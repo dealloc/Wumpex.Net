@@ -2,12 +2,12 @@ using System.Diagnostics;
 using Elixus.Discord.Gateway.Constants;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Exceptions;
-using Elixus.Discord.Gateway.Parsing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net.WebSockets;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
 
 namespace Elixus.Discord.Gateway;
@@ -20,13 +20,29 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 {
 	private readonly ILogger<DefaultDiscordGateway> _logger;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly IEventSerializer<HelloEvent> _helloSerializer;
+	private readonly IEventSerializer<HeartbeatEvent> _heartbeatSerializer;
+	private readonly IEventSerializer<ReconnectEvent> _reconnectSerializer;
+	private readonly IEventSerializer<InvalidSessionEvent> _invalidSessionSerializer;
+	private readonly IEventSerializer<HeartbeatAckEvent> _heartbeatAckSerializer;
 	private readonly ClientWebSocket _socket = new();
 	private readonly Memory<byte> _buffer = new(new byte[4096]);
 
-	public DefaultDiscordGateway(ILogger<DefaultDiscordGateway> logger, IServiceScopeFactory scopeFactory)
+	public DefaultDiscordGateway(ILogger<DefaultDiscordGateway> logger,
+		IServiceScopeFactory scopeFactory,
+		IEventSerializer<HelloEvent> helloSerializer,
+		IEventSerializer<HeartbeatEvent> heartbeatSerializer,
+		IEventSerializer<ReconnectEvent> reconnectSerializer,
+		IEventSerializer<InvalidSessionEvent> invalidSessionSerializer,
+		IEventSerializer<HeartbeatAckEvent> heartbeatAckSerializer)
 	{
 		_logger = logger;
 		_scopeFactory = scopeFactory;
+		_helloSerializer = helloSerializer;
+		_heartbeatSerializer = heartbeatSerializer;
+		_reconnectSerializer = reconnectSerializer;
+		_invalidSessionSerializer = invalidSessionSerializer;
+		_heartbeatAckSerializer = heartbeatAckSerializer;
 	}
 
 	/// <inheritdoc cref="IDisposable.Dispose"/>
@@ -59,17 +75,31 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		_logger.LogInformation("Discord gateway shutting down with status {StatusCode} ('{StatusMessage}')", _socket.CloseStatus, _socket.CloseStatusDescription ?? "Unspecified");
 	}
 
-	public async Task SendAsync(ArraySegment<byte> payload, CancellationToken cancellationToken)
+	/// <inheritdoc cref="IDiscordGateway.SendAsync{TEvent}" />
+	public Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : GatewayEvent
 	{
-		await _socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken);
+		var payload = @event switch
+		{
+			HelloEvent hello => _helloSerializer.Serialize(hello),
+			HeartbeatEvent heartbeat => _heartbeatSerializer.Serialize(heartbeat),
+			ReconnectEvent reconnect => _reconnectSerializer.Serialize(reconnect),
+			InvalidSessionEvent invalid => _invalidSessionSerializer.Serialize(invalid),
+			HeartbeatAckEvent heartbeat => _heartbeatAckSerializer.Serialize(heartbeat),
+			_ => throw new NotSupportedException($"Cannot send {@event.GetType().FullName} over gateway, no known serializer")
+		};
+
+		// ClientWebSocket is not thread-safe for sending, so we lock here to ensure safe access.
+		lock (_socket)
+		{
+			return _socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken);
+		}
 	}
 
 	/// <summary>
-	/// Parses the <paramref name="received" /> payload and dispatches it to the required handlers within the given <paramref name="scope" />.
+	/// Parses the <paramref name="received" /> payload and dispatches it to the required Serializers within the given <paramref name="scope" />.
 	/// </summary>
 	private ValueTask ParseAndDispatchPayload(IServiceScope scope, ReadOnlySpan<byte> received, out int? sequence, CancellationToken cancellationToken)
 	{
-		var context = GatewayEventSerializerContext.Default;
 		var payload = new EventPayload();
 		ParseEventPayload(ref payload, received);
 		sequence = payload.Sequence;
@@ -77,11 +107,11 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		_logger.LogTrace("Received gateway event with Opcode {Opcode} and EventName {EventName}", payload.Opcode, payload.EventName);
 		return payload.Opcode switch
 		{
-			GatewayOpcodes.Hello => DispatchPayload(scope, ref payload, context.HelloEvent, cancellationToken),
-			GatewayOpcodes.Heartbeat => DispatchPayload(scope, ref payload, context.HeartbeatEvent, cancellationToken),
-			GatewayOpcodes.Reconnect => DispatchPayload(scope, ref payload, context.ReconnectEvent, cancellationToken),
-			GatewayOpcodes.InvalidSession => DispatchPayload(scope, ref payload, context.InvalidSessionEvent, cancellationToken),
-			GatewayOpcodes.HeartbeatAck => DispatchPayload(scope, ref payload, context.HeartbeatAckEvent, cancellationToken),
+			GatewayOpcodes.Hello => DispatchPayload(scope, ref payload, _helloSerializer, cancellationToken),
+			GatewayOpcodes.Heartbeat => DispatchPayload(scope, ref payload, _heartbeatSerializer, cancellationToken),
+			GatewayOpcodes.Reconnect => DispatchPayload(scope, ref payload, _reconnectSerializer, cancellationToken),
+			GatewayOpcodes.InvalidSession => DispatchPayload(scope, ref payload, _invalidSessionSerializer, cancellationToken),
+			GatewayOpcodes.HeartbeatAck => DispatchPayload(scope, ref payload, _heartbeatAckSerializer, cancellationToken),
 			// Opcodes below are send-only and cannot be received, but intellisense prefers all arms to be present.
 			GatewayOpcodes.Identify
 			or GatewayOpcodes.PresenceUpdate
@@ -140,21 +170,13 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	}
 
 	/// <summary>
-	/// Small helper function to deserialize the event and dispatch to the registered <see cref="IEventHandler{TEvent}" />.
+	/// Small helper function to deserialize the event and dispatch to the registered <see cref="IEventSerializer{TEvent}" />.
 	/// </summary>
-	private ValueTask DispatchPayload<TEvent>(IServiceScope scope, ref EventPayload payload, JsonTypeInfo<TEvent> typeInfo, CancellationToken cancellationToken) where TEvent : GatewayEvent, new()
+	private ValueTask DispatchPayload<TEvent>(IServiceScope scope, ref EventPayload payload, IEventSerializer<TEvent> serializer, CancellationToken cancellationToken) where TEvent : GatewayEvent, new()
 	{
 		var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
-		var @event = payload.EventData.IsEmpty switch
-		{
-			true => new TEvent(),
-			_ => JsonSerializer.Deserialize(payload.EventData, typeInfo)
-		};
 
-		;
-		if (@event is null)
-			throw new InvalidOperationException($"Failed to deserialize event of type {typeof(TEvent).FullName}");
-
+		var @event = serializer.Deserialize(payload.EventData);
 		return handler.HandleEvent(@event, cancellationToken);
 	}
 }

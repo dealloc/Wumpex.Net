@@ -9,7 +9,6 @@ namespace Elixus.Discord.Gateway.Parsing;
 /// <see href="https://devblogs.microsoft.com/dotnet/try-the-new-system-text-json-source-generator/" />
 [JsonSerializable(typeof(HelloEvent))]
 [JsonSerializable(typeof(HeartbeatEvent))]
-[JsonSerializable(typeof(HeartbeatAckEvent))]
 [JsonSerializable(typeof(ReconnectEvent))]
 [JsonSerializable(typeof(InvalidSessionEvent))]
 internal partial class GatewayEventSerializerContext : JsonSerializerContext

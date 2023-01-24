@@ -17,5 +17,8 @@ public interface IDiscordGateway
 	/// <param name="cancellationToken">A <see cref="CancellationToken" /> to stop the server.</param>
 	Task RunAsync(Uri endpoint, CancellationToken cancellationToken = default);
 
-	Task SendAsync(ArraySegment<byte> payload, CancellationToken cancellationToken);
+	/// <summary>
+	/// Sends the given <typeparamref name="TEvent" /> over the gateway.
+	/// </summary>
+	Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : GatewayEvent;
 }

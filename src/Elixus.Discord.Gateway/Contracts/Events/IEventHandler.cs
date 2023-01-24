@@ -1,6 +1,6 @@
 using Elixus.Discord.Gateway.Events.Base;
 
-namespace Elixus.Discord.Gateway.Contracts;
+namespace Elixus.Discord.Gateway.Contracts.Events;
 
 /// <summary>
 /// Handles <typeparamref name="TEvent" /> received by the Discord WS Gateway.
