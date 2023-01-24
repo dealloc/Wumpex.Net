@@ -9,11 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleConsole", "examples\ExampleConsole\ExampleConsole.csproj", "{08E3A979-BAF2-4462-AD46-7176492DF9AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elixus.Discord.Api", "src\Elixus.Discord.Api\Elixus.Discord.Api.csproj", "{F39078A6-19B8-4479-9967-A53A7577A33F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elixus.Discord.Api", "src\Elixus.Discord.Api\Elixus.Discord.Api.csproj", "{F39078A6-19B8-4479-9967-A53A7577A33F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elixus.Discord.Gateway", "src\Elixus.Discord.Gateway\Elixus.Discord.Gateway.csproj", "{6C8496EC-CC5D-423B-A59E-EE8C63F73673}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,10 @@ Global
 		{F39078A6-19B8-4479-9967-A53A7577A33F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F39078A6-19B8-4479-9967-A53A7577A33F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F39078A6-19B8-4479-9967-A53A7577A33F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C8496EC-CC5D-423B-A59E-EE8C63F73673}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C8496EC-CC5D-423B-A59E-EE8C63F73673}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C8496EC-CC5D-423B-A59E-EE8C63F73673}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C8496EC-CC5D-423B-A59E-EE8C63F73673}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
