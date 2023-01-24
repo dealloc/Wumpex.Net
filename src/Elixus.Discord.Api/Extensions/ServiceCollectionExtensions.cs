@@ -13,6 +13,9 @@ namespace Elixus.Discord.Api.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+	/// <summary>
+	/// Adds Discord REST API related services to the container.
+	/// </summary>
 	public static void AddElixusDiscordApi(this IServiceCollection services)
 	{
 		var version = Assembly

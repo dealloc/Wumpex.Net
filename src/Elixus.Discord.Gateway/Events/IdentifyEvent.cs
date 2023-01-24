@@ -10,7 +10,7 @@ public sealed class IdentifyEvent : GatewayEvent
 	/// Authentication token
 	/// </summary>
 	[JsonPropertyName("token")]
-	public string Token { get; set; }
+	public string Token { get; set; } = null!;
 
 	/// <see href="https://discord.com/developers/docs/topics/gateway-events#identify-identify-connection-properties" />
 	[JsonPropertyName("properties")]
@@ -45,14 +45,24 @@ public sealed class IdentifyEvent : GatewayEvent
 	[JsonPropertyName("intents")]
 	public int Intents { get; set; }
 
+	/// <see href="https://discord.com/developers/docs/topics/gateway-events#identify-identify-connection-properties" />
 	public sealed class ConnectionProperties
 	{
+		/// <summary>
+		/// Your operating system.
+		/// </summary>
 		[JsonPropertyName("os")]
 		public string OperatingSystem { get; set; } = null!;
 
+		/// <summary>
+		/// Your library name.
+		/// </summary>
 		[JsonPropertyName("browser")]
 		public string Browser { get; set; } = null!;
 
+		/// <summary>
+		/// Your library name.
+		/// </summary>
 		[JsonPropertyName("device")]
 		public string Device { get; set; } = null!;
 	}

@@ -1,5 +1,8 @@
 namespace Elixus.Discord.Core.Configurations;
 
+/// <summary>
+/// Represents generic configuration required by the Elixus.Discord library.
+/// </summary>
 public sealed class DiscordConfiguration
 {
 

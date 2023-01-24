@@ -13,6 +13,9 @@ namespace Elixus.Discord.Gateway.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+	/// <summary>
+	/// Adds Discord WS Gateway related services.
+	/// </summary>
 	public static void AddElixusDiscordGateway(this IServiceCollection services)
 	{
 		services.AddSingleton<HostedHeartbeatService>();

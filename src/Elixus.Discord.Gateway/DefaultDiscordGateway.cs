@@ -117,7 +117,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			GatewayOpcodes.InvalidSession => DispatchPayload(scope, ref payload, _invalidSessionSerializer, cancellationToken),
 			GatewayOpcodes.HeartbeatAck => DispatchPayload(scope, ref payload, _heartbeatAckSerializer, cancellationToken),
 			// Opcodes below are send-only and cannot be received, but intellisense prefers all arms to be present.
-			GatewayOpcodes.Identify
+			GatewayOpcodes.Dispatch
+			or GatewayOpcodes.Identify
 			or GatewayOpcodes.PresenceUpdate
 			or GatewayOpcodes.VoiceStateUpdate
 			or GatewayOpcodes.Resume

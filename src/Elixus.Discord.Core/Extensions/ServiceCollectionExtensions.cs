@@ -9,6 +9,9 @@ namespace Elixus.Discord.Core.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+	/// <summary>
+	/// Adds core services and configuration for Elixus.Discord libraries.
+	/// </summary>
 	public static void AddElixusDiscordCore(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<DiscordConfiguration>(configuration);

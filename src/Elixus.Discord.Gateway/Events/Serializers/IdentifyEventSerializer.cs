@@ -7,6 +7,9 @@ using Elixus.Discord.Gateway.Parsing;
 
 namespace Elixus.Discord.Gateway.Events.Serializers;
 
+/// <summary>
+/// Serializes the <see cref="IdentifyEvent" /> for receiving and sending from the gateway.
+/// </summary>
 public sealed class IdentifyEventSerializer : IEventSerializer<IdentifyEvent>
 {
 	private readonly JsonTypeInfo<IdentifyEvent> _identifyType = GatewayEventSerializerContext.Default.IdentifyEvent;
