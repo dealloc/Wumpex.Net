@@ -6,6 +6,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Elixus.Discord.Api\Elixus.Discord.Api.csproj" />
+    <ProjectReference Include="..\Elixus.Discord.Core\Elixus.Discord.Core.csproj" />
     <ProjectReference Include="..\Elixus.Discord.Gateway\Elixus.Discord.Gateway.csproj" />
   </ItemGroup>
 </Project>

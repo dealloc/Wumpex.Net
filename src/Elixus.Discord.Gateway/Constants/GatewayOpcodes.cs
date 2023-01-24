@@ -1,7 +1,7 @@
 namespace Elixus.Discord.Gateway.Constants;
 
 /// <see href="https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-opcodes"/>
-internal enum GatewayOpcodes
+public enum GatewayOpcodes
 {
 	/// <summary>
 	/// An event was dispatched.

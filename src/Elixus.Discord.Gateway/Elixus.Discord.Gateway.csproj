@@ -8,4 +8,7 @@
     <Folder Include="Constants\" />
     <Folder Include="Contracts\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Elixus.Discord.Core\Elixus.Discord.Core.csproj" />
+  </ItemGroup>
 </Project>

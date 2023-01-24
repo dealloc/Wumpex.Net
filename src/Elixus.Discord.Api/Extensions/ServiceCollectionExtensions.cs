@@ -1,8 +1,6 @@
-﻿using Elixus.Discord.Api.Configurations;
-using Elixus.Discord.Api.Contracts;
+﻿using Elixus.Discord.Api.Contracts;
 using Elixus.Discord.Api.Http;
 using Elixus.Discord.Api.Http.MessageHandlers;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net.Http.Headers;
@@ -15,14 +13,13 @@ namespace Elixus.Discord.Api.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-	public static void AddElixusDiscordApi(this IServiceCollection services, IConfiguration configuration)
+	public static void AddElixusDiscordApi(this IServiceCollection services)
 	{
 		var version = Assembly
 			.GetExecutingAssembly()
 			.GetName().Version
 			?.ToString() ?? "1.0.0";
 
-		services.Configure<DiscordApiConfiguration>(configuration);
 		services.TryAddSingleton<IDiscordApi, HttpDiscordApiClient>();
 		services.AddSingleton<AuthorizationMessageHandler>();
 		services.AddHttpClient(Constants.HTTP_CLIENT_NAME, http =>

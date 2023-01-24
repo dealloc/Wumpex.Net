@@ -35,5 +35,7 @@ public static class ServiceCollectionExtensions
 
 		services.AddScoped<IEventHandler<ReconnectEvent>, ReconnectEventHandler>();
 		services.AddSingleton<IEventSerializer<ReconnectEvent>, ReconnectEventSerializer>();
+
+		services.AddSingleton<IEventSerializer<IdentifyEvent>, IdentifyEventSerializer>();
 	}
 }

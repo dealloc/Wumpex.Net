@@ -1,4 +1,5 @@
 using Elixus.Discord.Gateway.Contracts;
+using Elixus.Discord.Gateway.Events;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -76,12 +77,10 @@ internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatServ
 			}
 
 			_logger.LogInformation("Should send {Sequence}", _sequence);
-			// var payload = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
-			// {
-			// 	op = 1,
-			// 	d = _sequence
-			// }));
-			// await _discordGateway.SendAsync(payload, stoppingToken);
+			await _discordGateway.SendAsync(new HeartbeatEvent
+			{
+				Sequence = _sequence
+			}, stoppingToken);
 		}
 	}
 }

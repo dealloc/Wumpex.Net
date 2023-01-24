@@ -25,6 +25,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	private readonly IEventSerializer<ReconnectEvent> _reconnectSerializer;
 	private readonly IEventSerializer<InvalidSessionEvent> _invalidSessionSerializer;
 	private readonly IEventSerializer<HeartbeatAckEvent> _heartbeatAckSerializer;
+	private readonly IEventSerializer<IdentifyEvent> _identifySerializer;
 	private readonly ClientWebSocket _socket = new();
 	private readonly Memory<byte> _buffer = new(new byte[4096]);
 
@@ -34,7 +35,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		IEventSerializer<HeartbeatEvent> heartbeatSerializer,
 		IEventSerializer<ReconnectEvent> reconnectSerializer,
 		IEventSerializer<InvalidSessionEvent> invalidSessionSerializer,
-		IEventSerializer<HeartbeatAckEvent> heartbeatAckSerializer)
+		IEventSerializer<HeartbeatAckEvent> heartbeatAckSerializer,
+		IEventSerializer<IdentifyEvent> identifySerializer)
 	{
 		_logger = logger;
 		_scopeFactory = scopeFactory;
@@ -43,6 +45,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		_reconnectSerializer = reconnectSerializer;
 		_invalidSessionSerializer = invalidSessionSerializer;
 		_heartbeatAckSerializer = heartbeatAckSerializer;
+		_identifySerializer = identifySerializer;
 	}
 
 	/// <inheritdoc cref="IDisposable.Dispose"/>
@@ -85,6 +88,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			ReconnectEvent reconnect => _reconnectSerializer.Serialize(reconnect),
 			InvalidSessionEvent invalid => _invalidSessionSerializer.Serialize(invalid),
 			HeartbeatAckEvent heartbeat => _heartbeatAckSerializer.Serialize(heartbeat),
+			IdentifyEvent identify => _identifySerializer.Serialize(identify),
 			_ => throw new NotSupportedException($"Cannot send {@event.GetType().FullName} over gateway, no known serializer")
 		};
 

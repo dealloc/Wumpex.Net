@@ -1,5 +1,7 @@
+using Elixus.Discord.Core.Configurations;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Microsoft.Extensions.Options;
 
 namespace Elixus.Discord.Gateway.Events.Handlers;
 
@@ -12,16 +14,30 @@ internal sealed class HelloEventHandler : IEventHandler<HelloEvent>
 {
 	private readonly IHeartbeatService _heartbeatService;
 	private readonly IDiscordGateway _discordGateway;
+	private readonly IOptionsMonitor<DiscordConfiguration> _monitor;
 
-	public HelloEventHandler(IHeartbeatService heartbeatService, IDiscordGateway discordGateway)
+	public HelloEventHandler(IHeartbeatService heartbeatService, IDiscordGateway discordGateway, IOptionsMonitor<DiscordConfiguration> monitor)
 	{
 		_heartbeatService = heartbeatService;
 		_discordGateway = discordGateway;
+		_monitor = monitor;
 	}
 
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
 	public async ValueTask HandleEvent(HelloEvent @event, CancellationToken cancellationToken)
 	{
 		await _heartbeatService.Start(@event.HeartbeatInterval, cancellationToken);
+
+		await _discordGateway.SendAsync(new IdentifyEvent
+		{
+			Token = _monitor.CurrentValue.Token ?? string.Empty,
+			Properties = new()
+			{
+				OperatingSystem = "linux",
+				Browser = "Elixus.Discord",
+				Device = "Elixus.Discord"
+			},
+			Intents = 3145728,
+		}, cancellationToken);
 	}
 }

@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Headers;
-using Elixus.Discord.Api.Configurations;
+using Elixus.Discord.Core.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -11,9 +11,9 @@ namespace Elixus.Discord.Api.Http.MessageHandlers;
 internal sealed class AuthorizationMessageHandler : DelegatingHandler
 {
 	private readonly ILogger<AuthorizationMessageHandler> _logger;
-	private readonly IOptionsMonitor<DiscordApiConfiguration> _monitor;
+	private readonly IOptionsMonitor<DiscordConfiguration> _monitor;
 
-	public AuthorizationMessageHandler(ILogger<AuthorizationMessageHandler> logger, IOptionsMonitor<DiscordApiConfiguration> monitor)
+	public AuthorizationMessageHandler(ILogger<AuthorizationMessageHandler> logger, IOptionsMonitor<DiscordConfiguration> monitor)
 	{
 		_logger = logger;
 		_monitor = monitor;
