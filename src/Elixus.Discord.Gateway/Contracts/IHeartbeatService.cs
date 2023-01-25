@@ -22,4 +22,9 @@ public interface IHeartbeatService
 	/// If <see cref="Acknowledge" /> isn't called between heartbeats the gateway will be requested to close and resume.
 	/// </remarks>
 	ValueTask Acknowledge(CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Requests that the heartbeat service sends a heartbeat as soon as reasonably possible.
+	/// </summary>
+	ValueTask RequestSend(CancellationToken cancellationToken = default);
 }

@@ -10,9 +10,16 @@ namespace Elixus.Discord.Gateway.Events.Handlers;
 /// </summary>
 internal sealed class HeartbeatEventHandler : IEventHandler<HeartbeatEvent>
 {
-	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
-	public ValueTask HandleEvent(HeartbeatEvent @event, EventContext context, CancellationToken cancellationToken)
+	private readonly IHeartbeatService _heartbeat;
+
+	public HeartbeatEventHandler(IHeartbeatService heartbeatService)
 	{
-		throw new NotImplementedException();
+		_heartbeat = heartbeatService;
+	}
+
+	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
+	public async ValueTask HandleEvent(HeartbeatEvent @event, EventContext context, CancellationToken cancellationToken)
+	{
+		await _heartbeat.RequestSend(cancellationToken);
 	}
 }

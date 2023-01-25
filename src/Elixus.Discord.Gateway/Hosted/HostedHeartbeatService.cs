@@ -54,6 +54,16 @@ internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatServ
 		return ValueTask.CompletedTask;
 	}
 
+	/// <inheritdoc cref="IHeartbeatService.Acknowledge" />
+	public ValueTask RequestSend(CancellationToken cancellationToken = default)
+	{
+		// If we don't set acknowledge we'd throw when triggering a heartbeat as we may not have received an ack yet.
+		_wasAcknowledged = true;
+
+		_waitHandle.Cancel();
+		return ValueTask.CompletedTask;
+	}
+
 	/// <inheritdoc cref="BackgroundService.ExecuteAsync" />
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
@@ -76,7 +86,6 @@ internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatServ
 				_logger.LogWarning("Should send {Sequence}, but did NOT receive an ACK", _sequence);
 			}
 
-			_logger.LogInformation("Should send {Sequence}", _sequence);
 			await _discordGateway.SendAsync(new HeartbeatEvent
 			{
 				Sequence = _sequence

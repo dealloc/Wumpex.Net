@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Elixus.Discord.Core.Configurations;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
@@ -34,7 +35,7 @@ internal sealed class HelloEventHandler : IEventHandler<HelloEvent>
 			Token = _monitor.CurrentValue.Token ?? string.Empty,
 			Properties = new()
 			{
-				OperatingSystem = "linux",
+				OperatingSystem = RuntimeInformation.OSDescription,
 				Browser = "Elixus.Discord",
 				Device = "Elixus.Discord"
 			},
