@@ -25,19 +25,19 @@ public static class ServiceCollectionExtensions
 		services.AddSingleton<IDiscordGateway, DefaultDiscordGateway>();
 		services.AddSingleton<IDispatchEventHandler, DispatchEventHandler>();
 
-		services.AddScoped<IEventHandler<HelloEvent>, HelloEventHandler>();
+		services.AddSingleton<IEventHandler<HelloEvent>, HelloEventHandler>();
 		services.AddSingleton<IEventSerializer<HelloEvent>, HelloEventSerializer>();
 
-		services.AddScoped<IEventHandler<HeartbeatEvent>, HeartbeatEventHandler>();
+		services.AddSingleton<IEventHandler<HeartbeatEvent>, HeartbeatEventHandler>();
 		services.AddSingleton<IEventSerializer<HeartbeatEvent>, HeartbeatEventSerializer>();
 
-		services.AddScoped<IEventHandler<HeartbeatAckEvent>, HeartbeatAckEventHandler>();
+		services.AddSingleton<IEventHandler<HeartbeatAckEvent>, HeartbeatAckEventHandler>();
 		services.AddSingleton<IEventSerializer<HeartbeatAckEvent>, HeartbeatAckEventSerializer>();
 
-		services.AddScoped<IEventHandler<InvalidSessionEvent>, InvalidSessionEventHandler>();
+		services.AddSingleton<IEventHandler<InvalidSessionEvent>, InvalidSessionEventHandler>();
 		services.AddSingleton<IEventSerializer<InvalidSessionEvent>, InvalidSessionEventSerializer>();
 
-		services.AddScoped<IEventHandler<ReconnectEvent>, ReconnectEventHandler>();
+		services.AddSingleton<IEventHandler<ReconnectEvent>, ReconnectEventHandler>();
 		services.AddSingleton<IEventSerializer<ReconnectEvent>, ReconnectEventSerializer>();
 
 		services.AddSingleton<IEventSerializer<IdentifyEvent>, IdentifyEventSerializer>();

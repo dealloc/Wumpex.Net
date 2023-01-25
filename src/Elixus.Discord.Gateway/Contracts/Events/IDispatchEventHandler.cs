@@ -14,5 +14,5 @@ internal interface IDispatchEventHandler
 	/// <summary>
 	/// Infer the event type sent in the dispatch event and hand it over to the appropriate handlers.
 	/// </summary>
-	ValueTask HandleDispatch(IServiceScope scope, EventContext context, ref ReadOnlySpan<byte> payload, CancellationToken cancellationToken);
+	ValueTask HandleDispatch(EventContext context, ref ReadOnlySpan<byte> payload, CancellationToken cancellationToken);
 }
