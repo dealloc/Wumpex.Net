@@ -26,6 +26,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	private readonly IEventSerializer<InvalidSessionEvent> _invalidSessionSerializer;
 	private readonly IEventSerializer<HeartbeatAckEvent> _heartbeatAckSerializer;
 	private readonly IEventSerializer<IdentifyEvent> _identifySerializer;
+	private readonly IDispatchEventHandler _dispatchEventHandler;
+
 	private readonly ClientWebSocket _socket = new();
 	private readonly Memory<byte> _buffer = new(new byte[4096]);
 
@@ -36,7 +38,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		IEventSerializer<ReconnectEvent> reconnectSerializer,
 		IEventSerializer<InvalidSessionEvent> invalidSessionSerializer,
 		IEventSerializer<HeartbeatAckEvent> heartbeatAckSerializer,
-		IEventSerializer<IdentifyEvent> identifySerializer)
+		IEventSerializer<IdentifyEvent> identifySerializer,
+		IDispatchEventHandler dispatchEventHandler)
 	{
 		_logger = logger;
 		_scopeFactory = scopeFactory;
@@ -46,6 +49,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		_invalidSessionSerializer = invalidSessionSerializer;
 		_heartbeatAckSerializer = heartbeatAckSerializer;
 		_identifySerializer = identifySerializer;
+		_dispatchEventHandler = dispatchEventHandler;
 	}
 
 	/// <inheritdoc cref="IDisposable.Dispose"/>
@@ -115,9 +119,9 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			GatewayOpcodes.Reconnect => DispatchPayload(scope, context, ref payload, _reconnectSerializer, cancellationToken),
 			GatewayOpcodes.InvalidSession => DispatchPayload(scope, context, ref payload, _invalidSessionSerializer, cancellationToken),
 			GatewayOpcodes.HeartbeatAck => DispatchPayload(scope, context, ref payload, _heartbeatAckSerializer, cancellationToken),
+			GatewayOpcodes.Dispatch => _dispatchEventHandler.HandleDispatch(scope, context, ref payload, cancellationToken),
 			// Opcodes below are send-only and cannot be received, but intellisense prefers all arms to be present.
-			GatewayOpcodes.Dispatch
-			or GatewayOpcodes.Identify
+			GatewayOpcodes.Identify
 			or GatewayOpcodes.PresenceUpdate
 			or GatewayOpcodes.VoiceStateUpdate
 			or GatewayOpcodes.Resume
@@ -131,7 +135,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// </summary>
 	/// <param name="received">The binary data received from the socket.</param>
 	/// <param name="event">The actual event payload, exposed as an out param.</param>
-	/// <see cref="https://discord.com/developers/docs/topics/gateway-events#payload-structure" />
+	/// <see href="https://discord.com/developers/docs/topics/gateway-events#payload-structure" />
 	private EventContext ParseEventPayload(ReadOnlySpan<byte> received, out ReadOnlySpan<byte> @event)
 	{
 		var context = new EventContext();

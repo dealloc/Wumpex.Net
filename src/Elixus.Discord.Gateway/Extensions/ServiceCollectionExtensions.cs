@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
 		services.AddHostedService<HostedHeartbeatService>(provider => provider.GetRequiredService<HostedHeartbeatService>());
 
 		services.AddSingleton<IDiscordGateway, DefaultDiscordGateway>();
+		services.AddSingleton<IDispatchEventHandler, DispatchEventHandler>();
 
 		services.AddScoped<IEventHandler<HelloEvent>, HelloEventHandler>();
 		services.AddSingleton<IEventSerializer<HelloEvent>, HelloEventSerializer>();
