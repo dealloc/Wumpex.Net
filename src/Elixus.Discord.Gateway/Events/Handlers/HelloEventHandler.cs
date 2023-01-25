@@ -1,6 +1,7 @@
 using Elixus.Discord.Core.Configurations;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events.Base;
 using Microsoft.Extensions.Options;
 
 namespace Elixus.Discord.Gateway.Events.Handlers;
@@ -24,7 +25,7 @@ internal sealed class HelloEventHandler : IEventHandler<HelloEvent>
 	}
 
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
-	public async ValueTask HandleEvent(HelloEvent @event, CancellationToken cancellationToken)
+	public async ValueTask HandleEvent(HelloEvent @event, EventContext context, CancellationToken cancellationToken)
 	{
 		await _heartbeatService.Start(@event.HeartbeatInterval, cancellationToken);
 

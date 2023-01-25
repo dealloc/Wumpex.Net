@@ -1,5 +1,6 @@
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events.Base;
 
 namespace Elixus.Discord.Gateway.Events.Handlers;
 
@@ -18,7 +19,7 @@ internal sealed class HeartbeatAckEventHandler : IEventHandler<HeartbeatAckEvent
 	}
 
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
-	public async ValueTask HandleEvent(HeartbeatAckEvent @event, CancellationToken cancellationToken)
+	public async ValueTask HandleEvent(HeartbeatAckEvent @event, EventContext context, CancellationToken cancellationToken)
 	{
 		await _heartbeatService.Acknowledge(cancellationToken);
 	}

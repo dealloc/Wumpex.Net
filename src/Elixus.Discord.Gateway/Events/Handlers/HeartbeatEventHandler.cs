@@ -1,5 +1,6 @@
 ﻿using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events.Base;
 
 namespace Elixus.Discord.Gateway.Events.Handlers;
 
@@ -10,7 +11,7 @@ namespace Elixus.Discord.Gateway.Events.Handlers;
 internal sealed class HeartbeatEventHandler : IEventHandler<HeartbeatEvent>
 {
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
-	public ValueTask HandleEvent(HeartbeatEvent @event, CancellationToken cancellationToken)
+	public ValueTask HandleEvent(HeartbeatEvent @event, EventContext context, CancellationToken cancellationToken)
 	{
 		throw new NotImplementedException();
 	}

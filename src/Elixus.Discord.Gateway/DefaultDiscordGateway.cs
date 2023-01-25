@@ -104,18 +104,17 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// </summary>
 	private ValueTask ParseAndDispatchPayload(IServiceScope scope, ReadOnlySpan<byte> received, out int? sequence, CancellationToken cancellationToken)
 	{
-		var payload = new EventPayload();
-		ParseEventPayload(ref payload, received);
-		sequence = payload.Sequence;
+		var context = ParseEventPayload(received, out var payload);
+		sequence = context.Sequence;
 
-		_logger.LogTrace("Received gateway event with Opcode {Opcode} and EventName {EventName}", payload.Opcode, payload.EventName);
-		return payload.Opcode switch
+		_logger.LogTrace("Received gateway event with Opcode {Opcode} and EventName {EventName}", context.Opcode, context.EventName);
+		return context.Opcode switch
 		{
-			GatewayOpcodes.Hello => DispatchPayload(scope, ref payload, _helloSerializer, cancellationToken),
-			GatewayOpcodes.Heartbeat => DispatchPayload(scope, ref payload, _heartbeatSerializer, cancellationToken),
-			GatewayOpcodes.Reconnect => DispatchPayload(scope, ref payload, _reconnectSerializer, cancellationToken),
-			GatewayOpcodes.InvalidSession => DispatchPayload(scope, ref payload, _invalidSessionSerializer, cancellationToken),
-			GatewayOpcodes.HeartbeatAck => DispatchPayload(scope, ref payload, _heartbeatAckSerializer, cancellationToken),
+			GatewayOpcodes.Hello => DispatchPayload(scope, context, ref payload, _helloSerializer, cancellationToken),
+			GatewayOpcodes.Heartbeat => DispatchPayload(scope, context, ref payload, _heartbeatSerializer, cancellationToken),
+			GatewayOpcodes.Reconnect => DispatchPayload(scope, context, ref payload, _reconnectSerializer, cancellationToken),
+			GatewayOpcodes.InvalidSession => DispatchPayload(scope, context, ref payload, _invalidSessionSerializer, cancellationToken),
+			GatewayOpcodes.HeartbeatAck => DispatchPayload(scope, context, ref payload, _heartbeatAckSerializer, cancellationToken),
 			// Opcodes below are send-only and cannot be received, but intellisense prefers all arms to be present.
 			GatewayOpcodes.Dispatch
 			or GatewayOpcodes.Identify
@@ -123,15 +122,19 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			or GatewayOpcodes.VoiceStateUpdate
 			or GatewayOpcodes.Resume
 			or GatewayOpcodes.RequestGuildMembers
-			or _ => throw new ArgumentOutOfRangeException(nameof(payload.Opcode), payload.Opcode, "Don't know how to handle opcode")
+			or _ => throw new ArgumentOutOfRangeException(nameof(context.Opcode), context.Opcode, "Don't know how to handle opcode")
 		};
 	}
 
 	/// <summary>
-	/// Parses the received binary payload
+	/// Extracts the <see cref="EventContext" /> information from the request along with the event payload.
 	/// </summary>
-	private void ParseEventPayload(ref EventPayload payload, ReadOnlySpan<byte> received)
+	/// <param name="received">The binary data received from the socket.</param>
+	/// <param name="event">The actual event payload, exposed as an out param.</param>
+	/// <see cref="https://discord.com/developers/docs/topics/gateway-events#payload-structure" />
+	private EventContext ParseEventPayload(ReadOnlySpan<byte> received, out ReadOnlySpan<byte> @event)
 	{
+		var context = new EventContext();
 		var reader = new Utf8JsonReader(received);
 		reader.Read(); // advance to first symbol.
 
@@ -146,25 +149,25 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			switch (propertyName)
 			{
 				case "op":
-					payload.Opcode = (GatewayOpcodes)reader.GetInt32();
+					context.Opcode = (GatewayOpcodes)reader.GetInt32();
 					break;
 				case "s":
-					payload.Sequence = reader.TokenType is JsonTokenType.Null ? null : reader.GetInt32();
+					context.Sequence = reader.TokenType is JsonTokenType.Null ? null : reader.GetInt32();
 					break;
 				case "t":
-					payload.EventName = reader.TokenType is JsonTokenType.Null ? null : reader.GetString();
+					context.EventName = reader.TokenType is JsonTokenType.Null ? null : reader.GetString();
 					break;
 				case "d" when reader.TokenType is JsonTokenType.StartObject:
 				{
 					var start = (int)reader.TokenStartIndex;
 					reader.Skip();
 					var end = (int)reader.BytesConsumed;
-					payload.EventData = received[start..end];
-					return;
+					@event = received[start..end];
+					return context;
 				}
 				case "d" when reader.TokenType is JsonTokenType.Null:
-					payload.EventData = ReadOnlySpan<byte>.Empty;
-					return;
+					@event = ReadOnlySpan<byte>.Empty;
+					return context;
 				default:
 					throw new GatewayParserException(JsonTokenType.None, reader.TokenType, reader.BytesConsumed);
 			}
@@ -177,11 +180,11 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <summary>
 	/// Small helper function to deserialize the event and dispatch to the registered <see cref="IEventSerializer{TEvent}" />.
 	/// </summary>
-	private ValueTask DispatchPayload<TEvent>(IServiceScope scope, ref EventPayload payload, IEventSerializer<TEvent> serializer, CancellationToken cancellationToken) where TEvent : class, new()
+	private ValueTask DispatchPayload<TEvent>(IServiceScope scope, EventContext context, ref ReadOnlySpan<byte> payload, IEventSerializer<TEvent> serializer, CancellationToken cancellationToken) where TEvent : class, new()
 	{
 		var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
 
-		var @event = serializer.Deserialize(payload.EventData);
-		return handler.HandleEvent(@event, cancellationToken);
+		var @event = serializer.Deserialize(payload);
+		return handler.HandleEvent(@event, context, cancellationToken);
 	}
 }

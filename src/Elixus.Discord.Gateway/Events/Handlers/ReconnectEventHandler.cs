@@ -1,4 +1,5 @@
 ﻿using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events.Base;
 
 namespace Elixus.Discord.Gateway.Events.Handlers;
 
@@ -9,7 +10,7 @@ namespace Elixus.Discord.Gateway.Events.Handlers;
 internal sealed class ReconnectEventHandler : IEventHandler<ReconnectEvent>
 {
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
-	public ValueTask HandleEvent(ReconnectEvent @event, CancellationToken cancellationToken)
+	public ValueTask HandleEvent(ReconnectEvent @event, EventContext context, CancellationToken cancellationToken)
 	{
 		throw new NotImplementedException();
 	}
