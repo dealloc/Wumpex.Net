@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
-using Elixus.Discord.Gateway.Events.Base;
 
 namespace Elixus.Discord.Gateway.Events;
 
 /// <see href="https://discord.com/developers/docs/topics/gateway-events#identify-identify-structure" />
-public sealed class IdentifyEvent : GatewayEvent
+internal sealed class IdentifyEvent
 {
 	/// <summary>
 	/// Authentication token

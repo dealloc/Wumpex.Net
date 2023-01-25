@@ -3,14 +3,14 @@ using System.Text.Json.Serialization.Metadata;
 using Elixus.Discord.Gateway.Constants;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
-using Elixus.Discord.Gateway.Parsing;
+using Elixus.Discord.Gateway.Serialization;
 
 namespace Elixus.Discord.Gateway.Events.Serializers;
 
 /// <summary>
 /// Serializes the <see cref="IdentifyEvent" /> for receiving and sending from the gateway.
 /// </summary>
-public sealed class IdentifyEventSerializer : IEventSerializer<IdentifyEvent>
+internal sealed class IdentifyEventSerializer : IEventSerializer<IdentifyEvent>
 {
 	private readonly JsonTypeInfo<IdentifyEvent> _identifyType = GatewayEventSerializerContext.Default.IdentifyEvent;
 	private readonly JsonTypeInfo<GatewayEvent<IdentifyEvent>> _gatewayType = GatewayEventSerializerContext.Default.GatewayEventIdentifyEvent;

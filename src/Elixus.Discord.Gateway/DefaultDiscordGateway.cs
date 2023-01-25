@@ -79,7 +79,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	}
 
 	/// <inheritdoc cref="IDiscordGateway.SendAsync{TEvent}" />
-	public Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : GatewayEvent
+	public Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : class, new()
 	{
 		var payload = @event switch
 		{
@@ -177,7 +177,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <summary>
 	/// Small helper function to deserialize the event and dispatch to the registered <see cref="IEventSerializer{TEvent}" />.
 	/// </summary>
-	private ValueTask DispatchPayload<TEvent>(IServiceScope scope, ref EventPayload payload, IEventSerializer<TEvent> serializer, CancellationToken cancellationToken) where TEvent : GatewayEvent, new()
+	private ValueTask DispatchPayload<TEvent>(IServiceScope scope, ref EventPayload payload, IEventSerializer<TEvent> serializer, CancellationToken cancellationToken) where TEvent : class, new()
 	{
 		var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
 

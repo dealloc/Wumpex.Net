@@ -1,5 +1,3 @@
-using Elixus.Discord.Gateway.Events.Base;
-
 namespace Elixus.Discord.Gateway.Contracts;
 
 /// <summary>
@@ -20,5 +18,5 @@ public interface IDiscordGateway
 	/// <summary>
 	/// Sends the given <typeparamref name="TEvent" /> over the gateway.
 	/// </summary>
-	Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : GatewayEvent;
+	Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : class, new();
 }

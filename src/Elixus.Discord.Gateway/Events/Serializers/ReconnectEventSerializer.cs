@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Elixus.Discord.Gateway.Contracts.Events;
-using Elixus.Discord.Gateway.Parsing;
+using Elixus.Discord.Gateway.Serialization;
 
 namespace Elixus.Discord.Gateway.Events.Serializers;
 
