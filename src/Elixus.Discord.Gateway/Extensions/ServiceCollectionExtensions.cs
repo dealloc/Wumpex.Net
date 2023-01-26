@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
 	{
 		services.AddSingleton<HostedHeartbeatService>();
 		services.AddSingleton<IHeartbeatService>(provider => provider.GetRequiredService<HostedHeartbeatService>());
-		services.AddHostedService<HostedHeartbeatService>(provider => provider.GetRequiredService<HostedHeartbeatService>());
+		services.AddHostedService(provider => provider.GetRequiredService<HostedHeartbeatService>());
 
 		services.AddSingleton<IDiscordGateway, DefaultDiscordGateway>();
 		services.AddSingleton<IDispatchEventHandler, DispatchEventHandler>();

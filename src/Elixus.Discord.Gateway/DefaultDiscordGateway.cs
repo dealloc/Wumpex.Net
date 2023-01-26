@@ -1,13 +1,15 @@
-using System.Diagnostics;
 using Elixus.Discord.Gateway.Constants;
 using Elixus.Discord.Gateway.Contracts;
-using Elixus.Discord.Gateway.Exceptions;
-using Microsoft.Extensions.Logging;
-using System.Net.WebSockets;
-using System.Text.Json;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
+using Elixus.Discord.Gateway.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Net.WebSockets;
+using System.Text.Json;
+using System.Threading.Channels;
 
 namespace Elixus.Discord.Gateway;
 
@@ -18,22 +20,27 @@ namespace Elixus.Discord.Gateway;
 internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 {
 	private readonly ILogger<DefaultDiscordGateway> _logger;
-	private readonly IHeartbeatService _heartbeatService;
+	private readonly Lazy<IHeartbeatService> _heartbeatService;
 	private readonly IEventSerializer<HelloEvent> _helloSerializer;
-	private readonly IEventHandler<HelloEvent> _helloHandler;
+	private readonly Lazy<IEventHandler<HelloEvent>> _helloHandler;
 	private readonly IEventSerializer<HeartbeatEvent> _heartbeatSerializer;
-	private readonly IEventHandler<HeartbeatEvent> _heartbeatHandler;
+	private readonly Lazy<IEventHandler<HeartbeatEvent>> _heartbeatHandler;
 	private readonly IEventSerializer<ReconnectEvent> _reconnectSerializer;
-	private readonly IEventHandler<ReconnectEvent> _reconnectHandler;
+	private readonly Lazy<IEventHandler<ReconnectEvent>> _reconnectHandler;
 	private readonly IEventSerializer<InvalidSessionEvent> _invalidSessionSerializer;
-	private readonly IEventHandler<InvalidSessionEvent> _invalidSessionHandler;
+	private readonly Lazy<IEventHandler<InvalidSessionEvent>> _invalidSessionHandler;
 	private readonly IEventSerializer<HeartbeatAckEvent> _heartbeatAckSerializer;
-	private readonly IEventHandler<HeartbeatAckEvent> _heartbeatAckHandler;
+	private readonly Lazy<IEventHandler<HeartbeatAckEvent>> _heartbeatAckHandler;
 	private readonly IEventSerializer<IdentifyEvent> _identifySerializer;
 	private readonly IDispatchEventHandler _dispatchEventHandler;
 
 	private readonly ClientWebSocket _socket = new();
 	private readonly Memory<byte> _buffer = new(new byte[4096]);
+	private readonly Channel<byte[]> _events = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(1)
+	{
+		SingleWriter = true,
+		FullMode = BoundedChannelFullMode.Wait
+	});
 
 	/// <remarks>
 	/// Including a serializer and a handler directly instead of resolving from the container at runtime has two purposes:
@@ -41,34 +48,32 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// - only resolves once and allows for a type-safe dispatch, even if it means slightly more boilerplate code.
 	/// </remarks>
 	public DefaultDiscordGateway(ILogger<DefaultDiscordGateway> logger,
-		IHeartbeatService heartbeatService,
+		IServiceProvider serviceProvider,
 		IEventSerializer<HelloEvent> helloSerializer,
-		IEventHandler<HelloEvent> helloHandler,
 		IEventSerializer<HeartbeatEvent> heartbeatSerializer,
-		IEventHandler<HeartbeatEvent> heartbeatHandler,
 		IEventSerializer<ReconnectEvent> reconnectSerializer,
-		IEventHandler<ReconnectEvent> reconnectHandler,
 		IEventSerializer<InvalidSessionEvent> invalidSessionSerializer,
-		IEventHandler<InvalidSessionEvent> invalidSessionHandler,
 		IEventSerializer<HeartbeatAckEvent> heartbeatAckSerializer,
-		IEventHandler<HeartbeatAckEvent> heartbeatAckHandler,
 		IEventSerializer<IdentifyEvent> identifySerializer,
 		IDispatchEventHandler dispatchEventHandler)
 	{
 		_logger = logger;
-		_heartbeatService = heartbeatService;
 		_helloSerializer = helloSerializer;
-		_helloHandler = helloHandler;
 		_heartbeatSerializer = heartbeatSerializer;
-		_heartbeatHandler = heartbeatHandler;
 		_reconnectSerializer = reconnectSerializer;
-		_reconnectHandler = reconnectHandler;
 		_invalidSessionSerializer = invalidSessionSerializer;
-		_invalidSessionHandler = invalidSessionHandler;
 		_heartbeatAckSerializer = heartbeatAckSerializer;
-		_heartbeatAckHandler = heartbeatAckHandler;
 		_identifySerializer = identifySerializer;
 		_dispatchEventHandler = dispatchEventHandler;
+
+		// some services might refer to the gateway, so if we directly inject them we'll create a circular dependency
+		// Instead we wrap them in Lazy<T> so they're resolved when required for the first time from the root scope.
+		_heartbeatService = new(serviceProvider.GetRequiredService<IHeartbeatService>);
+		_helloHandler = new(serviceProvider.GetRequiredService<IEventHandler<HelloEvent>>);
+		_heartbeatHandler = new(serviceProvider.GetRequiredService<IEventHandler<HeartbeatEvent>>);
+		_reconnectHandler = new(serviceProvider.GetRequiredService<IEventHandler<ReconnectEvent>>);
+		_invalidSessionHandler = new(serviceProvider.GetRequiredService<IEventHandler<InvalidSessionEvent>>);
+		_heartbeatAckHandler = new(serviceProvider.GetRequiredService<IEventHandler<HeartbeatAckEvent>>);
 	}
 
 	/// <inheritdoc cref="IDisposable.Dispose"/>
@@ -77,9 +82,20 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <inheritdoc cref="IDiscordGateway.RunAsync"/>
 	public async Task RunAsync(Uri endpoint, CancellationToken cancellationToken = default)
 	{
-		var performance = new Stopwatch();
 		await _socket.ConnectAsync(endpoint, cancellationToken);
 
+		await Task.WhenAll(
+			ListenForIncomingEvents(cancellationToken),
+			ListenForOutgoingEvents(cancellationToken)
+		);
+	}
+
+	/// <summary>
+	/// Runs the internal listener loop for reading incoming events.
+	/// </summary>
+	private async Task ListenForIncomingEvents(CancellationToken cancellationToken)
+	{
+		var performance = new Stopwatch();
 		while (_socket.State is WebSocketState.Open && cancellationToken.IsCancellationRequested is false)
 		{
 			var result = await _socket.ReceiveAsync(_buffer, cancellationToken);
@@ -91,7 +107,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 
 			performance.Restart();
 			await ParseAndDispatchPayload(_buffer.Span[..result.Count], out var sequence, cancellationToken);
-			await _heartbeatService.Notify(sequence, cancellationToken);
+			await _heartbeatService.Value.Notify(sequence, cancellationToken);
 			_logger.LogTrace("Finished handling {EventSequence} in {Elapsed}", sequence, performance.Elapsed);
 		}
 
@@ -99,8 +115,24 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		_logger.LogInformation("Discord gateway shutting down with status {StatusCode} ('{StatusMessage}')", _socket.CloseStatus, _socket.CloseStatusDescription ?? "Unspecified");
 	}
 
+	/// <summary>
+	/// Starts the internal listener for outgoing events to send out.
+	/// </summary>
+	/// <remarks>
+	/// The <see cref="ClientWebSocket" /> is not thread-safe for writing from multiple locations.
+	/// The channel provides a synchronized way of writing events away without locking.
+	/// If we'd just `lock`, the compiler would (rightfully) complain that we're not always synchronizing access to _socket.
+	/// </remarks>
+	private async Task ListenForOutgoingEvents(CancellationToken cancellationToken)
+	{
+		await foreach (var @event in _events.Reader.ReadAllAsync(cancellationToken))
+		{
+			await _socket.SendAsync(@event, WebSocketMessageType.Text, true, cancellationToken);
+		}
+	}
+
 	/// <inheritdoc cref="IDiscordGateway.SendAsync{TEvent}" />
-	public Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : class, new()
+	public async Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : class, new()
 	{
 		var payload = @event switch
 		{
@@ -114,10 +146,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		};
 
 		// ClientWebSocket is not thread-safe for sending, so we lock here to ensure safe access.
-		lock (_socket)
-		{
-			return _socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken);
-		}
+		// we copy the binary payload (with `ToArray()`) to ensure it's memory is dedicated for this message and won't be GC'd.
+		await _events.Writer.WriteAsync(payload.ToArray(), cancellationToken);
 	}
 
 	/// <summary>
@@ -128,7 +158,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		var context = ParseEventPayload(received, out var payload);
 		sequence = context.Sequence;
 
-		_logger.LogTrace("Received gateway event with Opcode {Opcode} and EventName {EventName}", context.Opcode, context.EventName);
+		_logger.LogTrace("Received gateway event with Opcode {Opcode} ('{EventName}') as {Sequence}", context.Opcode, context.EventName, context.Sequence);
 		return context.Opcode switch
 		{
 			GatewayOpcodes.Hello => DispatchPayload(context, ref payload, _helloSerializer, _helloHandler, cancellationToken),
@@ -201,10 +231,10 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <summary>
 	/// Small helper function to deserialize the event and dispatch to the registered <see cref="IEventSerializer{TEvent}" />.
 	/// </summary>
-	private ValueTask DispatchPayload<TEvent>(EventContext context, ref ReadOnlySpan<byte> payload, IEventSerializer<TEvent> serializer, IEventHandler<TEvent> handler, CancellationToken cancellationToken) where TEvent : class, new()
+	private ValueTask DispatchPayload<TEvent>(EventContext context, ref ReadOnlySpan<byte> payload, IEventSerializer<TEvent> serializer, Lazy<IEventHandler<TEvent>> handler, CancellationToken cancellationToken) where TEvent : class, new()
 	{
 		var @event = serializer.Deserialize(payload);
 
-		return handler.HandleEvent(@event, context, cancellationToken);
+		return handler.Value.HandleEvent(@event, context, cancellationToken);
 	}
 }
