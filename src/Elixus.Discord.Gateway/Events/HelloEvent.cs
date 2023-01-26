@@ -4,7 +4,7 @@ namespace Elixus.Discord.Gateway.Events;
 
 /// <see href="https://discord.com/developers/docs/topics/gateway#hello-event" />
 /// <seealso href="https://discord.com/developers/docs/topics/gateway#sending-heartbeats"/>
-internal class HelloEvent
+public class HelloEvent
 {
 	/// <summary>
 	/// The interval (in milliseconds) at which heartbeats should be sent.

@@ -7,7 +7,7 @@ namespace Elixus.Discord.Gateway.Events.Base;
 /// This data type contains the opcode, event sequence and event name.
 /// </summary>
 /// <seealso href="https://discord.com/developers/docs/topics/gateway-events#payload-structure" />
-internal sealed record EventContext
+public sealed record EventContext
 {
 	/// <summary>
 	/// Gateway opcode, which indicates the payload type

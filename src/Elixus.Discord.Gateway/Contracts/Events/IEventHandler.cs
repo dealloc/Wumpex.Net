@@ -5,7 +5,7 @@ namespace Elixus.Discord.Gateway.Contracts.Events;
 /// <summary>
 /// Handles <typeparamref name="TEvent" /> received by the Discord WS Gateway.
 /// </summary>
-internal interface IEventHandler<in TEvent> where TEvent : class
+public interface IEventHandler<in TEvent> where TEvent : class
 {
 	/// <summary>
 	/// Handles the <paramref name="event" />.
