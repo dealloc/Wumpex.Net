@@ -36,6 +36,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 
 	private readonly ClientWebSocket _socket = new();
 	private readonly Memory<byte> _buffer = new(new byte[4096]);
+	private Uri? _reconnectEndpoint = null;
+	private string? _reconnectSession = null;
 	private readonly Channel<byte[]> _events = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(1)
 	{
 		SingleWriter = true,
@@ -85,9 +87,9 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		await _socket.ConnectAsync(endpoint, cancellationToken);
 		var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-		// we use WhenAny since WhenAll does not throw when a task fails.
-		// WhenAny will return the failed task, which we await to propagate the error.
-		// *IF* a task were to actually close normally we cancel `linked` to close all other listeners as well.
+			// we use WhenAny since WhenAll does not throw when a task fails.
+			// WhenAny will return the failed task, which we await to propagate the error.
+			// *IF* a task were to actually close normally we cancel `linked` to close all other listeners as well.
 		var result = await Task.WhenAny(
 			ListenForIncomingEvents(linked.Token),
 			ListenForOutgoingEvents(linked.Token)
@@ -120,7 +122,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 
 		var closeCode = (GatewayCloseCodes?)_socket.CloseStatus;
 		_logger.LogInformation("Discord gateway closed with status {StatusCode} ('{StatusMessage}')", closeCode, _socket.CloseStatusDescription ?? "Unspecified");
-		
+
 	}
 
 	/// <summary>
@@ -156,6 +158,15 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		// ClientWebSocket is not thread-safe for sending, so we lock here to ensure safe access.
 		// we copy the binary payload (with `ToArray()`) to ensure it's memory is dedicated for this message and won't be GC'd.
 		await _events.Writer.WriteAsync(payload.ToArray(), cancellationToken);
+	}
+
+	/// <inheritdoc cref="IDiscordGateway.ConfigureReconnect" />
+	public ValueTask ConfigureReconnect(Uri endpoint, string session, CancellationToken cancellationToken = default)
+	{
+		_reconnectEndpoint = endpoint;
+		_reconnectSession = session;
+
+		return ValueTask.CompletedTask;
 	}
 
 	/// <summary>

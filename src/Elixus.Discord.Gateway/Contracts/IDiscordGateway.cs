@@ -19,4 +19,13 @@ public interface IDiscordGateway
 	/// Sends the given <typeparamref name="TEvent" /> over the gateway.
 	/// </summary>
 	Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : class, new();
+
+	/// <summary>
+	/// Configures the information required for reconnecting.
+	/// </summary>
+	/// <param name="endpoint">The endpoint to use when reconnecting.</param>
+	/// <param name="session">The session ID to use when reconnecting.</param>
+	/// <param name="cancellationToken">A <see cref="CancellationToken" /> to cancel the operation.</param>
+	/// <seealso href="https://discord.com/developers/docs/topics/gateway#resuming" />
+	ValueTask ConfigureReconnect(Uri endpoint, string session, CancellationToken cancellationToken = default);
 }
