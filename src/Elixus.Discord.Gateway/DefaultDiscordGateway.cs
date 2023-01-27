@@ -83,11 +83,18 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	public async Task RunAsync(Uri endpoint, CancellationToken cancellationToken = default)
 	{
 		await _socket.ConnectAsync(endpoint, cancellationToken);
+		var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-		await Task.WhenAll(
-			ListenForIncomingEvents(cancellationToken),
-			ListenForOutgoingEvents(cancellationToken)
+		// we use WhenAny since WhenAll does not throw when a task fails.
+		// WhenAny will return the failed task, which we await to propagate the error.
+		// *IF* a task were to actually close normally we cancel `linked` to close all other listeners as well.
+		var result = await Task.WhenAny(
+			ListenForIncomingEvents(linked.Token),
+			ListenForOutgoingEvents(linked.Token)
 		);
+
+		linked.Cancel(); // ensures all listeners will be closed.
+		await result;
 	}
 
 	/// <summary>

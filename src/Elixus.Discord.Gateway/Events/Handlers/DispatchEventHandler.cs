@@ -1,3 +1,4 @@
+using Elixus.Discord.Core.Events.Gateway;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,16 +8,22 @@ namespace Elixus.Discord.Gateway.Events.Handlers;
 internal class DispatchEventHandler : IDispatchEventHandler
 {
 	private readonly IServiceScopeFactory _serviceScopeFactory;
+	private readonly IEventSerializer<ReadyEvent> _readySerializer;
 
-	public DispatchEventHandler(IServiceScopeFactory serviceScopeFactory)
+	public DispatchEventHandler(IServiceScopeFactory serviceScopeFactory, IEventSerializer<ReadyEvent> readySerializer)
 	{
 		_serviceScopeFactory = serviceScopeFactory;
+		_readySerializer = readySerializer;
 	}
 
 	/// <inheritdoc cref="IDispatchEventHandler.HandleDispatch" />
 	public ValueTask HandleDispatch(EventContext context, ref ReadOnlySpan<byte> payload, CancellationToken cancellationToken)
 	{
-		return ValueTask.CompletedTask;
+		return context.EventName?.ToUpperInvariant() switch
+		{
+			"READY" => ScopedDispatch(context, _readySerializer.Deserialize(payload), cancellationToken),
+			_ => throw new NotSupportedException($"Unknown event '{context.EventName}' received")
+		};
 	}
 
 	/// <summary>

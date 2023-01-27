@@ -18,6 +18,5 @@ public interface IDiscordGateway
 	/// <summary>
 	/// Sends the given <typeparamref name="TEvent" /> over the gateway.
 	/// </summary>
-	// TODO: this method needs to be refactored OUT of the gateway contract to avoid cyclic dependencies.
 	Task SendAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : class, new();
 }
