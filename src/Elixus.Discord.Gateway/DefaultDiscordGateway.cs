@@ -118,8 +118,9 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			_logger.LogTrace("Finished handling {EventSequence} in {Elapsed}", sequence, performance.Elapsed);
 		}
 
-		// TODO: check close code if we should reconnect?
-		_logger.LogInformation("Discord gateway shutting down with status {StatusCode} ('{StatusMessage}')", _socket.CloseStatus, _socket.CloseStatusDescription ?? "Unspecified");
+		var closeCode = (GatewayCloseCodes?)_socket.CloseStatus;
+		_logger.LogInformation("Discord gateway closed with status {StatusCode} ('{StatusMessage}')", closeCode, _socket.CloseStatusDescription ?? "Unspecified");
+		
 	}
 
 	/// <summary>
