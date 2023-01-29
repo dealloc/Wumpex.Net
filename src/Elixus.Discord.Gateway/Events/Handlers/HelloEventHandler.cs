@@ -10,6 +10,7 @@ namespace Elixus.Discord.Gateway.Events.Handlers;
 /// <summary>
 /// Handles the <see cref="HelloEvent" />.
 /// This handler will start the <see cref="IHeartbeatService" />.
+/// If the gateway is able to resume we'll send a RESUME, otherwise we send an IDENTIFY.
 /// </summary>
 /// <seealso cref="IHeartbeatService" />
 internal sealed class HelloEventHandler : IEventHandler<HelloEvent>
@@ -30,16 +31,31 @@ internal sealed class HelloEventHandler : IEventHandler<HelloEvent>
 	{
 		await _heartbeatService.Start(@event.HeartbeatInterval, cancellationToken);
 
-		await _discordGateway.SendAsync(new IdentifyEvent
+		if (await _discordGateway.CanRecover)
 		{
-			Token = _monitor.CurrentValue.Token ?? string.Empty,
-			Properties = new()
+			var session = await _discordGateway.ResumeSession;
+			var sequence = await _heartbeatService.Sequence;
+
+			await _discordGateway.SendAsync(new ResumeEvent
 			{
-				OperatingSystem = RuntimeInformation.OSDescription,
-				Browser = "Elixus.Discord",
-				Device = "Elixus.Discord"
-			},
-			Intents = 3145728,
-		}, cancellationToken);
+				Token = _monitor.CurrentValue.Token ?? string.Empty,
+				SessionId = session ?? string.Empty,
+				Sequence = sequence ?? -1,
+			}, cancellationToken);
+		}
+		else
+		{
+			await _discordGateway.SendAsync(new IdentifyEvent
+			{
+				Token = _monitor.CurrentValue.Token ?? string.Empty,
+				Properties = new()
+				{
+					OperatingSystem = RuntimeInformation.OSDescription,
+					Browser = "Elixus.Discord",
+					Device = "Elixus.Discord"
+				},
+				Intents = 3145728,
+			}, cancellationToken);
+		}
 	}
 }

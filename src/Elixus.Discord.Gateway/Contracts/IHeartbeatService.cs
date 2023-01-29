@@ -6,8 +6,16 @@ namespace Elixus.Discord.Gateway.Contracts;
 public interface IHeartbeatService
 {
 	/// <summary>
+	/// Gets the last received sequence.
+	/// </summary>
+	ValueTask<int?> Sequence { get; }
+
+	/// <summary>
 	/// Tells the <see cref="IHeartbeatService" /> to start sending out heartbeats at the given <paramref name="interval" /> (in milliseconds).
 	/// </summary>
+	/// <remarks>
+	/// This method should be omnipotent - it can be called multiple times and should support this.
+	/// </remarks>
 	ValueTask Start(int interval, CancellationToken cancellationToken = default);
 
 	/// <summary>

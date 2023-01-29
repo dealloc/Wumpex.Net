@@ -1,4 +1,5 @@
 using Elixus.Discord.Core.Events.Gateway;
+using Elixus.Discord.Core.Exceptions;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
 using Microsoft.Extensions.DependencyInjection;

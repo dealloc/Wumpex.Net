@@ -1,6 +1,5 @@
 using Elixus.Discord.Gateway.Constants;
 using Elixus.Discord.Gateway.Events.Base;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Elixus.Discord.Gateway.Contracts.Events;
 

@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
 		services.AddSingleton<IEventHandler<ReconnectEvent>, ReconnectEventHandler>();
 		services.AddSingleton<IEventSerializer<ReconnectEvent>, ReconnectEventSerializer>();
 		services.AddSingleton<IEventSerializer<IdentifyEvent>, IdentifyEventSerializer>();
+		services.AddSingleton<IEventSerializer<ResumeEvent>, ResumeEventSerializer>();
 
 		// Core
 		services.AddSingleton<IEventSerializer<ReadyEvent>, ReadyEventSerializer>();

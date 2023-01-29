@@ -11,6 +11,9 @@ namespace Elixus.Discord.Gateway.Hosted;
 /// <seealso cref="IHeartbeatService" />
 internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatService
 {
+	/// <inheritdoc cref="IHeartbeatService.Sequence" />
+	public ValueTask<int?> Sequence => ValueTask.FromResult(_sequence);
+
 	private TimeSpan _interval = Timeout.InfiniteTimeSpan;
 	private int? _sequence = null;
 	private bool _wasAcknowledged = false;

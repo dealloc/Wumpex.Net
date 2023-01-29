@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
+using Elixus.Discord.Core.Exceptions;
 
 namespace Elixus.Discord.Gateway;
 
@@ -19,6 +20,16 @@ namespace Elixus.Discord.Gateway;
 /// <seealso cref="IDiscordGateway" />
 internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 {
+	/// <inheritdoc cref="IDiscordGateway.CanRecover" />
+	/// <remarks>We await <see cref="ResumeEndpoint" /> and <see cref="ResumeSession" /> since we know internally they're synchronously set.</remarks>
+	public ValueTask<bool> CanRecover => ValueTask.FromResult(_resumeEndpoint is not null && string.IsNullOrWhiteSpace(_resumeSession) is false);
+
+	/// <inheritdoc cref="IDiscordGateway.ResumeEndpoint" />
+	public ValueTask<Uri?> ResumeEndpoint => ValueTask.FromResult(_resumeEndpoint);
+
+	/// <inheritdoc cref="IDiscordGateway.ResumeSession" />
+	public ValueTask<string?> ResumeSession => ValueTask.FromResult(_resumeSession);
+
 	private readonly ILogger<DefaultDiscordGateway> _logger;
 	private readonly Lazy<IHeartbeatService> _heartbeatService;
 	private readonly IEventSerializer<HelloEvent> _helloSerializer;
@@ -34,15 +45,16 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	private readonly IEventSerializer<IdentifyEvent> _identifySerializer;
 	private readonly IDispatchEventHandler _dispatchEventHandler;
 
+	private Uri? _resumeEndpoint;
+	private string? _resumeSession;
 	private readonly ClientWebSocket _socket = new();
 	private readonly Memory<byte> _buffer = new(new byte[4096]);
-	private Uri? _reconnectEndpoint = null;
-	private string? _reconnectSession = null;
 	private readonly Channel<byte[]> _events = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(1)
 	{
 		SingleWriter = true,
 		FullMode = BoundedChannelFullMode.Wait
 	});
+
 
 	/// <remarks>
 	/// Including a serializer and a handler directly instead of resolving from the container at runtime has two purposes:
@@ -107,22 +119,40 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		var performance = new Stopwatch();
 		while (_socket.State is WebSocketState.Open && cancellationToken.IsCancellationRequested is false)
 		{
-			var result = await _socket.ReceiveAsync(_buffer, cancellationToken);
+			try
+			{
+				var result = await _socket.ReceiveAsync(_buffer, cancellationToken);
 
-			if (result.MessageType is WebSocketMessageType.Close)
-				break;
-			if (result.EndOfMessage is false)
-				throw new NotSupportedException("Elixus.Discord currently does not support messages larger than 4096 bytes");
+				if (result.MessageType is WebSocketMessageType.Close)
+					throw new GatewayClosedException(_socket);
+				if (result.EndOfMessage is false)
+					throw new NotSupportedException("Elixus.Discord currently does not support messages larger than 4096 bytes");
 
-			performance.Restart();
-			await ParseAndDispatchPayload(_buffer.Span[..result.Count], out var sequence, cancellationToken);
-			await _heartbeatService.Value.Notify(sequence, cancellationToken);
-			_logger.LogTrace("Finished handling {EventSequence} in {Elapsed}", sequence, performance.Elapsed);
+				performance.Restart();
+				await ParseAndDispatchPayload(_buffer.Span[..result.Count], out var sequence, cancellationToken);
+				await _heartbeatService.Value.Notify(sequence, cancellationToken);
+				_logger.LogTrace("Finished handling {EventSequence} in {Elapsed}", sequence, performance.Elapsed);
+			}
+			catch (GatewayClosedException exception) when (exception.CanRecover is not true)
+			{
+				_logger.LogCritical(exception, "Discord Gateway closed and cannot recover from status {StatusCode} ('{StatusMessage}')", exception.CloseCode, exception.Message);
+				_resumeEndpoint = null;
+				_resumeSession = null;
+
+				throw;
+			}
+			catch (Exception exception)
+			{
+				_logger.LogCritical(exception, "An error occured on the Discord WS Gateway");
+				if (exception is DiscordException { CanRecover: not true })
+				{
+					_resumeEndpoint = null;
+					_resumeSession = null;
+				}
+
+				throw;
+			}
 		}
-
-		var closeCode = (GatewayCloseCodes?)_socket.CloseStatus;
-		_logger.LogInformation("Discord gateway closed with status {StatusCode} ('{StatusMessage}')", closeCode, _socket.CloseStatusDescription ?? "Unspecified");
-
 	}
 
 	/// <summary>
@@ -163,8 +193,8 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <inheritdoc cref="IDiscordGateway.ConfigureReconnect" />
 	public ValueTask ConfigureReconnect(Uri endpoint, string session, CancellationToken cancellationToken = default)
 	{
-		_reconnectEndpoint = endpoint;
-		_reconnectSession = session;
+		_resumeEndpoint = endpoint;
+		_resumeSession = session;
 
 		return ValueTask.CompletedTask;
 	}

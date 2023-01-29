@@ -9,6 +9,24 @@ namespace Elixus.Discord.Gateway.Contracts;
 public interface IDiscordGateway
 {
 	/// <summary>
+	/// Whether or not the gateway is currently capable of recovering if required.
+	/// This should (usually) be <c>true</c> after <see cref="ConfigureReconnect" /> was called.
+	/// </summary>
+	ValueTask<bool> CanRecover { get; }
+
+	/// <summary>
+	/// Gets the endpoint at which the gateway should resume (if available).
+	/// </summary>
+	/// <see cref="ConfigureReconnect" />
+	ValueTask<Uri?> ResumeEndpoint { get; }
+
+	/// <summary>
+	/// Gets the session to use when resuming (if available).
+	/// </summary>
+	/// <see cref="ConfigureReconnect" />
+	ValueTask<string?> ResumeSession { get; }
+
+	/// <summary>
 	/// Starts the <see cref="IDiscordGateway" /> and run it until the <paramref name="cancellationToken" /> is set.
 	/// </summary>
 	/// <param name="endpoint">The websocket gateway to connect to.</param>

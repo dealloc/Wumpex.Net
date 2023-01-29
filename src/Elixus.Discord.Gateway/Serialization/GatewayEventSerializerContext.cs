@@ -12,6 +12,7 @@ namespace Elixus.Discord.Gateway.Serialization;
 [JsonSerializable(typeof(ReconnectEvent))]
 [JsonSerializable(typeof(InvalidSessionEvent))]
 [JsonSerializable(typeof(GatewayEvent<IdentifyEvent>))]
+[JsonSerializable(typeof(GatewayEvent<ResumeEvent>))]
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class GatewayEventSerializerContext : JsonSerializerContext
 {
