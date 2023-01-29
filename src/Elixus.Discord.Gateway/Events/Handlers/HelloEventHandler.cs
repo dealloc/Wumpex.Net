@@ -54,7 +54,7 @@ internal sealed class HelloEventHandler : IEventHandler<HelloEvent>
 					Browser = "Elixus.Discord",
 					Device = "Elixus.Discord"
 				},
-				Intents = 3145728,
+				Intents = 1 << 1,
 			}, cancellationToken);
 		}
 	}

@@ -3,6 +3,7 @@ using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Handlers;
+using Elixus.Discord.Gateway.Events.Handlers.Core;
 using Elixus.Discord.Gateway.Events.Serializers;
 using Elixus.Discord.Gateway.Events.Serializers.Core;
 using Elixus.Discord.Gateway.Hosted;
@@ -41,5 +42,6 @@ public static class ServiceCollectionExtensions
 
 		// Core
 		services.AddSingleton<IEventSerializer<ReadyEvent>, ReadyEventSerializer>();
+		services.AddSingleton<IEventHandler<ReadyEvent>, ReadyEventHandler>();
 	}
 }

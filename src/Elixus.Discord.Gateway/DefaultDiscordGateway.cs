@@ -48,7 +48,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	private Uri? _resumeEndpoint;
 	private string? _resumeSession;
 	private readonly ClientWebSocket _socket = new();
-	private readonly Memory<byte> _buffer = new(new byte[4096]);
+	private readonly Memory<byte> _buffer = new(new byte[102400]);
 	private readonly Channel<byte[]> _events = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(1)
 	{
 		SingleWriter = true,
@@ -126,7 +126,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 				if (result.MessageType is WebSocketMessageType.Close)
 					throw new GatewayClosedException(_socket);
 				if (result.EndOfMessage is false)
-					throw new NotSupportedException("Elixus.Discord currently does not support messages larger than 4096 bytes");
+					throw new NotSupportedException($"Elixus.Discord currently does not support messages larger than {_buffer.Length} bytes");
 
 				performance.Restart();
 				await ParseAndDispatchPayload(_buffer.Span[..result.Count], out var sequence, cancellationToken);
