@@ -1,4 +1,5 @@
 ﻿using Elixus.Discord.Core.Configurations;
+using Elixus.Discord.Core.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,19 @@ public static class ServiceCollectionExtensions
 	public static void AddElixusDiscordCore(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<DiscordConfiguration>(configuration);
-		services.Configure<DiscordApiConfiguration>(configuration.GetSection("Api"));
+	}
+
+	/// <summary>
+	/// Configures the gateway to request all given intents.
+	/// </summary>
+	public static void AddDiscordIntents(this IServiceCollection services, params GatewayIntents[] intents)
+	{
+		var requested = intents
+			.Aggregate(GatewayIntents.Default, (total, intent) => total | intent);
+
+		services.Configure<DiscordConfiguration>(config =>
+		{
+			config.Gateway.Intents = requested;
+		});
 	}
 }

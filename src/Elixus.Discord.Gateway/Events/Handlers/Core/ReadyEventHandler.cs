@@ -21,7 +21,7 @@ internal sealed class ReadyEventHandler : IEventHandler<ReadyEvent>
 	public async ValueTask HandleEvent(ReadyEvent @event, EventContext context, CancellationToken cancellationToken)
 	{
 		var endpoint = new Uri(@event.ResumeGatewayUrl);
-		_logger.LogTrace("Configuring gateway to resume to {Endpoint}", endpoint);
+		_logger.LogDebug("Configuring gateway to resume to {Endpoint}", endpoint);
 
 		await _discordGateway.ConfigureReconnect(endpoint, @event.SessionId, cancellationToken);
 	}

@@ -48,13 +48,12 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	private Uri? _resumeEndpoint;
 	private string? _resumeSession;
 	private readonly ClientWebSocket _socket = new();
-	private readonly Memory<byte> _buffer = new(new byte[102400]);
+	private readonly Memory<byte> _buffer = new(new byte[102400]); // 100MB
 	private readonly Channel<byte[]> _events = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(1)
 	{
 		SingleWriter = true,
 		FullMode = BoundedChannelFullMode.Wait
 	});
-
 
 	/// <remarks>
 	/// Including a serializer and a handler directly instead of resolving from the container at runtime has two purposes:

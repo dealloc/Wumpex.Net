@@ -1,4 +1,5 @@
 ﻿using Elixus.Discord.Api.Extensions;
+using Elixus.Discord.Core.Constants;
 using Elixus.Discord.Core.Extensions;
 using Elixus.Discord.Gateway.Extensions;
 using Elixus.Discord.Hosted;
@@ -11,6 +12,7 @@ await Host.CreateDefaultBuilder()
 		services.AddElixusDiscordCore(host.Configuration.GetSection("Elixus.Discord"));
 		services.AddElixusDiscordApi();
 		services.AddElixusDiscordGateway();
+		services.AddDiscordIntents(GatewayIntents.Default);
 		services.AddHostedService<HostedDiscordService>();
 	})
 	.Build()

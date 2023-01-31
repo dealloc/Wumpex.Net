@@ -14,4 +14,7 @@ public sealed class DiscordConfiguration
 
 	/// <inheritdoc cref="DiscordApiConfiguration" />
 	public DiscordApiConfiguration Api { get; set; } = new();
+
+	/// <inheritdoc cref="DiscordGatewayConfiguration" />
+	public DiscordGatewayConfiguration Gateway { get; set; } = new();
 }
