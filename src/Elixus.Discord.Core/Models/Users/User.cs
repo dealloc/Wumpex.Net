@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Elixus.Discord.Core.Constants.Users;
 
 namespace Elixus.Discord.Core.Models.Users;
 
@@ -97,7 +98,7 @@ public sealed class User
 	/// <remarks>Requires identify scope</remarks>
 	/// <seealso href="https://discord.com/developers/docs/resources/user#user-object-user-flags" />
 	[JsonPropertyName("flags")]
-	public int? Flags { get; set; }
+	public UserFlags? Flags { get; set; }
 
 	/// <summary>
 	/// The type of Nitro subscription on a user's account
@@ -105,7 +106,7 @@ public sealed class User
 	/// <remarks>Requires identify scope</remarks>
 	/// <seealso href="https://discord.com/developers/docs/resources/user#user-object-premium-types" />
 	[JsonPropertyName("premium_type")]
-	public int? PremiumType { get; set; }
+	public PremiumTypes? PremiumType { get; set; }
 
 	/// <summary>
 	/// The public flags on a user's account
@@ -113,5 +114,5 @@ public sealed class User
 	/// <remarks>Requires identify scope</remarks>
 	/// <seealso href="https://discord.com/developers/docs/resources/user#user-object-user-flags" />
 	[JsonPropertyName("public_flags")]
-	public int? PublicFlags { get; set; }
+	public UserFlags? PublicFlags { get; set; }
 }

@@ -1,4 +1,5 @@
 using Elixus.Discord.Core.Events.Gateway;
+using Elixus.Discord.Core.Events.Guilds;
 using Elixus.Discord.Core.Exceptions;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
@@ -10,11 +11,13 @@ internal class DispatchEventHandler : IDispatchEventHandler
 {
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly IEventSerializer<ReadyEvent> _readySerializer;
+	private readonly IEventSerializer<GuildCreateEvent> _guildCreateSerializer;
 
-	public DispatchEventHandler(IServiceScopeFactory serviceScopeFactory, IEventSerializer<ReadyEvent> readySerializer)
+	public DispatchEventHandler(IServiceScopeFactory serviceScopeFactory, IEventSerializer<ReadyEvent> readySerializer, IEventSerializer<GuildCreateEvent> guildCreateSerializer)
 	{
 		_serviceScopeFactory = serviceScopeFactory;
 		_readySerializer = readySerializer;
+		_guildCreateSerializer = guildCreateSerializer;
 	}
 
 	/// <inheritdoc cref="IDispatchEventHandler.HandleDispatch" />
@@ -23,6 +26,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		return context.EventName?.ToUpperInvariant() switch
 		{
 			"READY" => ScopedDispatch(context, _readySerializer.Deserialize(payload), cancellationToken),
+			"GUILD_CREATE" => ScopedDispatch(context, _guildCreateSerializer.Deserialize(payload), cancellationToken),
 			_ => throw new NotSupportedException($"Unknown event '{context.EventName}' received")
 		};
 	}

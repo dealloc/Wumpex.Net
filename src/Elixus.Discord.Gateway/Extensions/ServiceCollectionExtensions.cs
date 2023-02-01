@@ -1,4 +1,5 @@
 using Elixus.Discord.Core.Events.Gateway;
+using Elixus.Discord.Core.Events.Guilds;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events;
@@ -43,5 +44,7 @@ public static class ServiceCollectionExtensions
 		// Core
 		services.AddSingleton<IEventSerializer<ReadyEvent>, ReadyEventSerializer>();
 		services.AddSingleton<IEventHandler<ReadyEvent>, ReadyEventHandler>();
+
+		services.AddSingleton<IEventSerializer<GuildCreateEvent>, GuildCreateEventSerializer>();
 	}
 }

@@ -8,6 +8,7 @@ namespace Elixus.Discord.Gateway.Exceptions;
 /// </summary>
 public sealed class GatewayParserException : DiscordException
 {
+	/// <inheritdoc cref="DiscordException.CanRecover" />
 	public override bool? CanRecover => false;
 
 	/// <summary>
