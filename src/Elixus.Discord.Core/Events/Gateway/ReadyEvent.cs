@@ -2,6 +2,8 @@ using Elixus.Discord.Core.Models.Applications;
 using Elixus.Discord.Core.Models.Guilds;
 using Elixus.Discord.Core.Models.Users;
 using System.Text.Json.Serialization;
+using Elixus.Discord.Core.Attributes;
+using Elixus.Discord.Core.Constants.Gateway;
 
 namespace Elixus.Discord.Core.Events.Gateway;
 
@@ -10,6 +12,7 @@ namespace Elixus.Discord.Core.Events.Gateway;
 /// The ready event can be the largest and most complex event the gateway will send, as it contains all the state required for a client to begin interacting with the rest of the platform.
 /// </summary>
 /// <see href="https://discord.com/developers/docs/topics/gateway-events#ready" />
+[Intent(GatewayIntents.Default)]
 public class ReadyEvent
 {
 	/// <summary>

@@ -1,5 +1,6 @@
 ﻿using Elixus.Discord.Api.Extensions;
 using Elixus.Discord.Core.Constants;
+using Elixus.Discord.Core.Constants.Gateway;
 using Elixus.Discord.Core.Extensions;
 using Elixus.Discord.Gateway.Extensions;
 using Elixus.Discord.Hosted;

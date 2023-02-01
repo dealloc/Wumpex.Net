@@ -1,5 +1,6 @@
 ﻿using Elixus.Discord.Core.Configurations;
 using Elixus.Discord.Core.Constants;
+using Elixus.Discord.Core.Constants.Gateway;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

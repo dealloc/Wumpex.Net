@@ -1,4 +1,4 @@
-namespace Elixus.Discord.Core.Constants;
+namespace Elixus.Discord.Core.Constants.Gateway;
 
 /// <see href="https://discord.com/developers/docs/topics/gateway#list-of-intents" />
 /// <seealso href="https://discord-intents-calculator.vercel.app/" />

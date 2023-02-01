@@ -1,4 +1,4 @@
-using Elixus.Discord.Core.Constants;
+using Elixus.Discord.Core.Constants.Gateway;
 
 namespace Elixus.Discord.Core.Configurations;
 

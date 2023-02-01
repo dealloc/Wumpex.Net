@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Elixus.Discord.Core.Attributes;
+using Elixus.Discord.Core.Constants.Gateway;
 using Elixus.Discord.Core.Models.Channels;
 using Elixus.Discord.Core.Models.Gateway;
 using Elixus.Discord.Core.Models.Guilds;
@@ -14,6 +16,7 @@ namespace Elixus.Discord.Core.Events.Guilds;
 /// 3. When the current user joins a new Guild.
 /// </summary>
 /// <see href="https://discord.com/developers/docs/topics/gateway-events#guild-create" />
+[Intent(GatewayIntents.Guilds)]
 public class GuildCreateEvent : Guild
 {
 	/// <summary>
