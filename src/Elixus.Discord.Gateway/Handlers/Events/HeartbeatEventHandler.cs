@@ -1,8 +1,9 @@
 ﻿using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
 
-namespace Elixus.Discord.Gateway.Events.Handlers;
+namespace Elixus.Discord.Gateway.Handlers.Events;
 
 /// <summary>
 /// Handles the <see cref="HeartbeatEvent" />.

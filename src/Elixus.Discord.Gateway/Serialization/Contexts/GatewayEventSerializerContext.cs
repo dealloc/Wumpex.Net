@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
 
-namespace Elixus.Discord.Gateway.Serialization;
+namespace Elixus.Discord.Gateway.Serialization.Contexts;
 
 /// <summary>
 /// Entrypoint for the System.Text.Json serialization code generators.

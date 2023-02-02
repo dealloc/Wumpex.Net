@@ -2,10 +2,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Elixus.Discord.Gateway.Constants;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
-using Elixus.Discord.Gateway.Serialization;
+using Elixus.Discord.Gateway.Serialization.Contexts;
 
-namespace Elixus.Discord.Gateway.Events.Serializers;
+namespace Elixus.Discord.Gateway.Serialization;
 
 /// <summary>
 /// Serializes the <see cref="ResumeEvent" /> for receiving and sending from the gateway.

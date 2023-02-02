@@ -1,6 +1,7 @@
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events;
 
-namespace Elixus.Discord.Gateway.Events.Serializers;
+namespace Elixus.Discord.Gateway.Serialization;
 
 internal class HeartbeatAckEventSerializer : IEventSerializer<HeartbeatAckEvent>
 {

@@ -4,7 +4,7 @@ using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Elixus.Discord.Gateway.Events.Handlers;
+namespace Elixus.Discord.Gateway.Handlers.Events;
 
 internal class DispatchEventHandler : IDispatchEventHandler
 {

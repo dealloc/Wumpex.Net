@@ -4,7 +4,7 @@ using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
 using Microsoft.Extensions.Logging;
 
-namespace Elixus.Discord.Gateway.Events.Handlers.Core;
+namespace Elixus.Discord.Gateway.Handlers.Events.Core;
 
 internal sealed class ReadyEventHandler : IEventHandler<ReadyEvent>
 {

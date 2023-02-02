@@ -2,10 +2,10 @@ using Elixus.Discord.Core.Events.Gateway;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events;
-using Elixus.Discord.Gateway.Events.Handlers;
-using Elixus.Discord.Gateway.Events.Handlers.Core;
-using Elixus.Discord.Gateway.Events.Serializers;
+using Elixus.Discord.Gateway.Handlers.Events;
+using Elixus.Discord.Gateway.Handlers.Events.Core;
 using Elixus.Discord.Gateway.Hosted;
+using Elixus.Discord.Gateway.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Elixus.Discord.Gateway.Extensions;

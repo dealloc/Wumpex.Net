@@ -3,7 +3,7 @@ using System.Text.Json.Serialization.Metadata;
 using Elixus.Discord.Core.Serialization;
 using Elixus.Discord.Gateway.Contracts.Events;
 
-namespace Elixus.Discord.Gateway.Events.Serializers;
+namespace Elixus.Discord.Gateway.Serialization;
 
 /// <summary>
 /// Whenever an event has no specific serialization needs this serializer takes care of serializing and deserializing.

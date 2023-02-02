@@ -2,10 +2,11 @@ using System.Runtime.InteropServices;
 using Elixus.Discord.Core.Configurations;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
 using Microsoft.Extensions.Options;
 
-namespace Elixus.Discord.Gateway.Events.Handlers;
+namespace Elixus.Discord.Gateway.Handlers.Events;
 
 /// <summary>
 /// Handles the <see cref="HelloEvent" />.

@@ -1,8 +1,9 @@
 using System.Text.Json;
 using Elixus.Discord.Gateway.Constants;
 using Elixus.Discord.Gateway.Contracts.Events;
+using Elixus.Discord.Gateway.Events;
 
-namespace Elixus.Discord.Gateway.Events.Serializers;
+namespace Elixus.Discord.Gateway.Serialization;
 
 internal class HeartbeatEventSerializer : IEventSerializer<HeartbeatEvent>
 {
