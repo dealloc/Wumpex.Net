@@ -32,6 +32,7 @@ internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatServ
 	/// <inheritdoc cref="IHeartbeatService.Start" />
 	public ValueTask Start(int interval, CancellationToken cancellationToken = default)
 	{
+		_sequence = 0;
 		_wasAcknowledged = true;
 		_interval = TimeSpan.FromMilliseconds(interval);
 		_logger.LogDebug("Setting heartbeat to {Interval}", _interval);
@@ -44,7 +45,8 @@ internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatServ
 	/// <inheritdoc cref="IHeartbeatService.Notify" />
 	public ValueTask Notify(int? sequence, CancellationToken cancellationToken = default)
 	{
-		_sequence = sequence;
+		if (_sequence < sequence)
+			_sequence = sequence;
 
 		return ValueTask.CompletedTask;
 	}

@@ -98,9 +98,9 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		await _socket.ConnectAsync(endpoint, cancellationToken);
 		var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-			// we use WhenAny since WhenAll does not throw when a task fails.
-			// WhenAny will return the failed task, which we await to propagate the error.
-			// *IF* a task were to actually close normally we cancel `linked` to close all other listeners as well.
+		// we use WhenAny since WhenAll does not throw when a task fails.
+		// WhenAny will return the failed task, which we await to propagate the error.
+		// *IF* a task were to actually close normally we cancel `linked` to close all other listeners as well.
 		var result = await Task.WhenAny(
 			ListenForIncomingEvents(linked.Token),
 			ListenForOutgoingEvents(linked.Token)
@@ -115,7 +115,6 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// </summary>
 	private async Task ListenForIncomingEvents(CancellationToken cancellationToken)
 	{
-		var performance = new Stopwatch();
 		while (_socket.State is WebSocketState.Open && cancellationToken.IsCancellationRequested is false)
 		{
 			try
@@ -127,10 +126,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 				if (result.EndOfMessage is false)
 					throw new NotSupportedException($"Elixus.Discord currently does not support messages larger than {_buffer.Length} bytes");
 
-				performance.Restart();
-				await ParseAndDispatchPayload(_buffer.Span[..result.Count], out var sequence, cancellationToken);
-				await _heartbeatService.Value.Notify(sequence, cancellationToken);
-				_logger.LogTrace("Finished handling {EventSequence} in {Elapsed}", sequence, performance.Elapsed);
+				await ParseAndDispatchPayload(_buffer.Span[..result.Count], cancellationToken);
 			}
 			catch (GatewayClosedException exception) when (exception.CanRecover is not true)
 			{
@@ -201,19 +197,19 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <summary>
 	/// Parses the <paramref name="received" /> payload and dispatches it to the required Serializers and Handlers.
 	/// </summary>
-	private ValueTask ParseAndDispatchPayload(ReadOnlySpan<byte> received, out int? sequence, CancellationToken cancellationToken)
+	private ValueTask ParseAndDispatchPayload(ReadOnlySpan<byte> received, CancellationToken cancellationToken)
 	{
 		var context = ParseEventPayload(received, out var payload);
-		sequence = context.Sequence;
 
 		_logger.LogTrace("Received gateway event with Opcode {Opcode} ('{EventName}') as {Sequence}", context.Opcode, context.EventName, context.Sequence);
 		return context.Opcode switch
 		{
-			GatewayOpcodes.Hello => DispatchPayload(context, ref payload, _helloSerializer, _helloHandler, cancellationToken),
-			GatewayOpcodes.Heartbeat => DispatchPayload(context, ref payload, _heartbeatSerializer, _heartbeatHandler, cancellationToken),
-			GatewayOpcodes.Reconnect => DispatchPayload(context, ref payload, _reconnectSerializer, _reconnectHandler, cancellationToken),
-			GatewayOpcodes.InvalidSession => DispatchPayload(context, ref payload, _invalidSessionSerializer, _invalidSessionHandler, cancellationToken),
-			GatewayOpcodes.HeartbeatAck => DispatchPayload(context, ref payload, _heartbeatAckSerializer, _heartbeatAckHandler, cancellationToken),
+			GatewayOpcodes.Hello => DispatchPayload(context, _helloSerializer.Deserialize(payload), _helloHandler, cancellationToken),
+			GatewayOpcodes.Heartbeat => DispatchPayload(context, _heartbeatSerializer.Deserialize(payload), _heartbeatHandler, cancellationToken),
+			GatewayOpcodes.Reconnect => DispatchPayload(context, _reconnectSerializer.Deserialize(payload), _reconnectHandler, cancellationToken),
+			GatewayOpcodes.InvalidSession => DispatchPayload(context, _invalidSessionSerializer.Deserialize(payload), _invalidSessionHandler, cancellationToken),
+			GatewayOpcodes.HeartbeatAck => DispatchPayload(context, _heartbeatAckSerializer.Deserialize(payload), _heartbeatAckHandler, cancellationToken),
+			// Note that DISPATCH does not use DispatchPayload, so that sequencing for heartbeats are handled separately.
 			GatewayOpcodes.Dispatch => _dispatchEventHandler.HandleDispatch(context, ref payload, cancellationToken),
 			// Opcodes below are send-only and cannot be received, but intellisense prefers all arms to be present.
 			GatewayOpcodes.Identify
@@ -279,10 +275,11 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	/// <summary>
 	/// Small helper function to deserialize the event and dispatch to the registered <see cref="IEventSerializer{TEvent}" />.
 	/// </summary>
-	private ValueTask DispatchPayload<TEvent>(EventContext context, ref ReadOnlySpan<byte> payload, IEventSerializer<TEvent> serializer, Lazy<IEventHandler<TEvent>> handler, CancellationToken cancellationToken) where TEvent : class, new()
+	private async ValueTask DispatchPayload<TEvent>(EventContext context, TEvent @event, Lazy<IEventHandler<TEvent>> handler, CancellationToken cancellationToken) where TEvent : class, new()
 	{
-		var @event = serializer.Deserialize(payload);
+		await handler.Value.HandleEvent(@event, context, cancellationToken);
 
-		return handler.Value.HandleEvent(@event, context, cancellationToken);
+		await _heartbeatService.Value.Notify(context.Sequence, cancellationToken);
+		_logger.LogTrace("Finished handling {EventSequence}", context.Sequence);
 	}
 }
