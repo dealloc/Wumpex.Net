@@ -3,7 +3,7 @@ namespace Elixus.Discord.Gateway.Contracts.Events;
 /// <summary>
 /// Handles serialization of gateway events.
 /// </summary>
-internal interface IEventSerializer<TEvent> where TEvent : class, new()
+public interface IEventSerializer<TEvent> where TEvent : class, new()
 {
 	/// <summary>
 	/// Serializes <typeparamref name="TEvent" /> into a binary form.
