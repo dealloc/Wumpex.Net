@@ -5,26 +5,13 @@ using Elixus.Discord.Core.Models.Users;
 namespace Elixus.Discord.Core.Models.Stickers;
 
 /// <see href="https://discord.com/developers/docs/resources/sticker#sticker-object" />
-public sealed class Sticker
+public sealed class Sticker : StickerItem
 {
-	/// <summary>
-	/// id of the sticker.
-	/// </summary>
-	/// <seealso href="https://discord.com/developers/docs/reference#image-formatting" />
-	[JsonPropertyName("id")]
-	public string Id { get; set; } = null!;
-
 	/// <summary>
 	/// For standard stickers, id of the pack the sticker is from.
 	/// </summary>
 	[JsonPropertyName("pack_id")]
 	public string? PackId { get; set; }
-
-	/// <summary>
-	/// name of the sticker.
-	/// </summary>
-	[JsonPropertyName("name")]
-	public string Name { get; set; } = null!;
 
 	/// <summary>
 	/// description of the sticker
@@ -54,12 +41,6 @@ public sealed class Sticker
 	/// </summary>
 	[JsonPropertyName("type")]
 	public StickerTypes Type { get; set; }
-
-	/// <summary>
-	/// Type of sticker format.
-	/// </summary>
-	[JsonPropertyName("format_type")]
-	public StickerFormats FormatType { get; set; }
 
 	/// <summary>
 	/// whether this guild sticker can be used, may be false due to loss of Server Boosts.

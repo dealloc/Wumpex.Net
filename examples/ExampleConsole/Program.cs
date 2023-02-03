@@ -12,7 +12,7 @@ await Host.CreateDefaultBuilder()
 		services.AddElixusDiscordCore(host.Configuration.GetSection("Elixus.Discord"));
 		services.AddElixusDiscordApi();
 		services.AddElixusDiscordGateway();
-		services.AddDiscordIntents(GatewayIntents.Guilds);
+		services.AddDiscordIntents(GatewayIntents.Guilds, GatewayIntents.GuildMessages);
 		services.AddHostedService<HostedDiscordService>();
 	})
 	.Build()

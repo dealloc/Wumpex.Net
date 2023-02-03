@@ -5,7 +5,7 @@ namespace Elixus.Discord.Core.Attributes;
 /// <summary>
 /// Indicates which <see cref="GatewayIntents" /> are required for this event.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class IntentAttribute : Attribute
 {
 	/// <summary>

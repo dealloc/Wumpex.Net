@@ -1,9 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 using Elixus.Discord.Core.Constants.Users;
 
 namespace Elixus.Discord.Core.Models.Users;
 
 /// <see href="https://discord.com/developers/docs/resources/user#user-object" />
+[DebuggerDisplay("{Username}#{Discriminator}")]
 public sealed class User
 {
 	/// <summary>
