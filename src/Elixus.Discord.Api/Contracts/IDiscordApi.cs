@@ -24,4 +24,19 @@ public interface IDiscordApi
 	/// <returns>A <see cref="ApplicationCommand" /> object of the created/updated command.</returns>
 	/// <seealso href="https://discord.com/developers/docs/interactions/application-commands#endpoints" />
 	Task<ApplicationCommand> CreateGlobalApplicationCommand(CreateApplicationCommandRequest request, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Fetch all of the global commands for your application.
+	/// Returns an array of application command objects.
+	/// </summary>
+	/// <remarks>
+	/// The objects returned by this endpoint may be augmented with additional fields if localization is active.
+	/// </remarks>
+	IAsyncEnumerable<ApplicationCommand> GetGlobalApplicationCommands(bool withLocalizations = false, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Deletes a global command.
+	/// Returns 204 No Content on success.
+	/// </summary>
+	Task DeleteGlobalApplicationCommand(string id, CancellationToken cancellationToken = default);
 }

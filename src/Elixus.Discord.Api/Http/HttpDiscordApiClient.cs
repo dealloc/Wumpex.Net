@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Elixus.Discord.Api.Contracts;
 using Elixus.Discord.Api.Exceptions;
 using Elixus.Discord.Api.Models.Gateway;
@@ -54,5 +56,24 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 			_logger.LogError(exception, "Failed to create global application: {Message}", body);
 			throw;
 		}
+	}
+
+	/// <inheritdoc cref="IDiscordApi.GetGlobalApplicationCommands" />
+	public async IAsyncEnumerable<ApplicationCommand> GetGlobalApplicationCommands(bool withLocalizations = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var stream = await _http.GetStreamAsync($"{_endpoint}/applications/{_monitor.CurrentValue.ApplicationId}/commands", cancellationToken);
+
+		await foreach (var command in JsonSerializer.DeserializeAsyncEnumerable(stream, ApiSerializerContext.Default.ApplicationCommand, cancellationToken))
+		{
+			yield return command!;
+		}
+	}
+
+	/// <inheritdoc cref="IDiscordApi.DeleteGlobalApplicationCommand" />
+	public async Task DeleteGlobalApplicationCommand(string id, CancellationToken cancellationToken = default)
+	{
+		var response = await _http.DeleteAsync($"{_endpoint}/applications/{_monitor.CurrentValue.ApplicationId}/commands/{id}", cancellationToken);
+
+		response.EnsureSuccessStatusCode();
 	}
 }
