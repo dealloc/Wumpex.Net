@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Elixus.Discord.Core.Events.Guilds;
+using Elixus.Discord.Core.Events.Interactions;
 using Elixus.Discord.Core.Events.Messages;
 
 namespace Elixus.Discord.Core.Serialization;
@@ -13,6 +14,7 @@ namespace Elixus.Discord.Core.Serialization;
 [JsonSerializable(typeof(ReadyEvent))]
 [JsonSerializable(typeof(GuildCreateEvent))]
 [JsonSerializable(typeof(MessageCreateEvent))]
+[JsonSerializable(typeof(InteractionCreateEvent))]
 public partial class EventSerializerContext : JsonSerializerContext
 {
 }

@@ -1,5 +1,6 @@
 using Elixus.Discord.Core.Events.Gateway;
 using Elixus.Discord.Core.Events.Guilds;
+using Elixus.Discord.Core.Events.Interactions;
 using Elixus.Discord.Core.Events.Messages;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events.Base;
@@ -15,18 +16,21 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	private readonly IEventSerializer<ReadyEvent> _readySerializer;
 	private readonly IEventSerializer<GuildCreateEvent> _guildCreateSerializer;
 	private readonly IEventSerializer<MessageCreateEvent> _messageCreateSerializer;
+	private readonly IEventSerializer<InteractionCreateEvent> _interactionCreateSerializer;
 
 	public DispatchEventHandler(ILogger<DispatchEventHandler> logger,
 		IServiceScopeFactory serviceScopeFactory,
 		IEventSerializer<ReadyEvent> readySerializer,
 		IEventSerializer<GuildCreateEvent> guildCreateSerializer,
-		IEventSerializer<MessageCreateEvent> messageCreateSerializer)
+		IEventSerializer<MessageCreateEvent> messageCreateSerializer,
+		IEventSerializer<InteractionCreateEvent> interactionCreateSerializer)
 	{
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
 		_readySerializer = readySerializer;
 		_guildCreateSerializer = guildCreateSerializer;
 		_messageCreateSerializer = messageCreateSerializer;
+		_interactionCreateSerializer = interactionCreateSerializer;
 	}
 
 	/// <inheritdoc cref="IDispatchEventHandler.HandleDispatch" />
@@ -37,6 +41,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 			"READY" => ScopedDispatch(context, _readySerializer.Deserialize(payload), cancellationToken),
 			"GUILD_CREATE" => ScopedDispatch(context, _guildCreateSerializer.Deserialize(payload), cancellationToken),
 			"MESSAGE_CREATE" => ScopedDispatch(context, _messageCreateSerializer.Deserialize(payload), cancellationToken),
+			"INTERACTION_CREATE" => ScopedDispatch(context, _interactionCreateSerializer.Deserialize(payload), cancellationToken),
 			_ => throw new NotSupportedException($"Unknown event '{context.EventName}' received")
 		};
 	}

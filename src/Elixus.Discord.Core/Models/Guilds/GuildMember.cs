@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Elixus.Discord.Core.Constants.Guilds;
 using Elixus.Discord.Core.Models.Users;
@@ -5,6 +6,7 @@ using Elixus.Discord.Core.Models.Users;
 namespace Elixus.Discord.Core.Models.Guilds;
 
 /// <see href="https://discord.com/developers/docs/resources/guild#guild-member-object" />
+[DebuggerDisplay("{User}")]
 public sealed class GuildMember
 {
 	/// <summary>
