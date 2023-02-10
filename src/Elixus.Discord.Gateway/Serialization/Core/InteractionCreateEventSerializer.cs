@@ -44,16 +44,16 @@ public class InteractionCreateEventSerializer : IEventSerializer<InteractionCrea
 	/// </summary>
 	private Interaction DeserializeInteraction(ref ReadOnlySpan<byte> payload)
 	{
-		var node = JsonNode.Parse(payload);
+		var node = JsonNode.Parse(payload)!;
 
 		return node["type"].Deserialize(EventSerializerContext.Default.InteractionTypes) switch
 		{
 			InteractionTypes.Ping => throw new NotSupportedException(),
-			InteractionTypes.ApplicationCommand => node.Deserialize(EventSerializerContext.Default.ApplicationCommandInteraction),
-			InteractionTypes.MessageComponent => node.Deserialize(EventSerializerContext.Default.MessageComponentInteraction),
-			InteractionTypes.ApplicationCommandAutocomplete => node.Deserialize(EventSerializerContext.Default.ApplicationCommandAutocompleteInteraction),
-			InteractionTypes.ModalSubmit => node.Deserialize(EventSerializerContext.Default.ModalSubmitInteraction),
-			_ => throw new ArgumentOutOfRangeException()
+			InteractionTypes.ApplicationCommand => node.Deserialize(EventSerializerContext.Default.ApplicationCommandInteraction)!,
+			InteractionTypes.MessageComponent => node.Deserialize(EventSerializerContext.Default.MessageComponentInteraction)!,
+			InteractionTypes.ApplicationCommandAutocomplete => node.Deserialize(EventSerializerContext.Default.ApplicationCommandAutocompleteInteraction)!,
+			InteractionTypes.ModalSubmit => node.Deserialize(EventSerializerContext.Default.ModalSubmitInteraction)!,
+			_ => throw new ArgumentOutOfRangeException("type")
 		};
 	}
 }

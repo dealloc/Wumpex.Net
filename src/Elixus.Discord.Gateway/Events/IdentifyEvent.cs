@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Elixus.Discord.Core.Models.Gateway;
 
 namespace Elixus.Discord.Gateway.Events;
 
@@ -35,7 +36,11 @@ public sealed class IdentifyEvent
 	[JsonPropertyName("shard")]
 	public (int, int)? Shard { get; set; }
 
-	// TODO: presence field.
+	/// <summary>
+	/// Presence structure for initial presence information.
+	/// </summary>
+	[JsonPropertyName("presence")]
+	public PresenceUpdate? Presence { get; set; }
 
 	/// <summary>
 	/// Gateway Intents you wish to receive

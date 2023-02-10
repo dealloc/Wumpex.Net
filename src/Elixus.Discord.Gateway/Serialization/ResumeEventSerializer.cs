@@ -25,5 +25,5 @@ public class ResumeEventSerializer : IEventSerializer<ResumeEvent>
 
 	/// <inheritdoc cref="IEventSerializer{TEvent}.Deserialize" />
 	public ResumeEvent Deserialize(ReadOnlySpan<byte> payload)
-		=> throw new NotImplementedException("Resume does not support receiving");
+		=> throw new NotSupportedException("Resume does not support receiving");
 }

@@ -1,6 +1,7 @@
 ﻿using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events;
 using Elixus.Discord.Gateway.Events.Base;
+using Elixus.Discord.Gateway.Exceptions;
 
 namespace Elixus.Discord.Gateway.Handlers.Events;
 
@@ -13,6 +14,6 @@ internal sealed class InvalidSessionEventHandler : IEventHandler<InvalidSessionE
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
 	public ValueTask HandleEvent(InvalidSessionEvent @event, EventContext context, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		throw new InvalidSessionException();
 	}
 }

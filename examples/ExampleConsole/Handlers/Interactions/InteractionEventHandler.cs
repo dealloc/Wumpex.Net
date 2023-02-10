@@ -10,11 +10,17 @@ using Microsoft.Extensions.Logging;
 
 namespace ExampleConsole.Handlers.Interactions;
 
+/// <summary>
+/// Example handler to an interaction.
+/// </summary>
 public class InteractionEventHandler : IEventHandler<InteractionCreateEvent>
 {
 	private readonly ILogger<InteractionEventHandler> _logger;
 	private readonly IDiscordApi _discordApi;
 
+	/// <summary>
+	/// Creates a new instance of <see cref="InteractionEventHandler" />
+	/// </summary>
 	public InteractionEventHandler(ILogger<InteractionEventHandler> logger, IDiscordApi discordApi)
 	{
 		_logger = logger;

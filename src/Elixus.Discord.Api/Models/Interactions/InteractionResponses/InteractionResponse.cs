@@ -16,6 +16,7 @@ public abstract class InteractionResponse
 	public virtual InteractionCallbackTypes Type { get; }
 }
 
+/// <inheritdoc cref="InteractionResponse" />
 public class MessageInteractionResponse : InteractionResponse
 {
 	/// <inheritdoc cref="InteractionResponse.Type" />
@@ -25,9 +26,10 @@ public class MessageInteractionResponse : InteractionResponse
 	/// an optional response message.
 	/// </summary>
 	[JsonPropertyName("data")]
-	public InteractionCallbackMessage Data { get; set; }
+	public InteractionCallbackMessage Data { get; set; } = null!;
 }
 
+/// <inheritdoc cref="InteractionResponse" />
 public class ModalInteractionResponse : InteractionResponse
 {
 	/// <inheritdoc cref="InteractionResponse.Type" />
@@ -37,5 +39,5 @@ public class ModalInteractionResponse : InteractionResponse
 	/// an optional response message.
 	/// </summary>
 	[JsonPropertyName("data")]
-	public InteractionCallbackModal? Data { get; set; }
+	public InteractionCallbackModal? Data { get; set; } = null!;
 }

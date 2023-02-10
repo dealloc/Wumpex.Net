@@ -87,7 +87,6 @@ internal sealed class HostedHeartbeatService : BackgroundService, IHeartbeatServ
 
 			if (_wasAcknowledged is false)
 			{
-				// TODO: we did NOT receive an ACK!
 				_logger.LogWarning("Should send {Sequence}, but did NOT receive an ACK", _sequence);
 			}
 
