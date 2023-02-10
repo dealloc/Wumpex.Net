@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
 
 		services.TryAddSingleton<IDiscordApi, HttpDiscordApiClient>();
 		services.AddSingleton<AuthorizationMessageHandler>();
-		services.AddHttpClient(Constants.HTTP_CLIENT_NAME, http =>
+		services.AddHttpClient("elixus.discord.api", http =>
 		{
 			http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Elixus.Discord", version));
 		}).AddHttpMessageHandler<AuthorizationMessageHandler>();

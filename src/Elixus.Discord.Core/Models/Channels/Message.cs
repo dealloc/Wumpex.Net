@@ -3,8 +3,8 @@ using Elixus.Discord.Core.Constants.Channels;
 using Elixus.Discord.Core.Constants.Gateway;
 using Elixus.Discord.Core.Models.Applications;
 using Elixus.Discord.Core.Models.Channels.Embeds;
-using Elixus.Discord.Core.Models.Components;
 using Elixus.Discord.Core.Models.Interactions;
+using Elixus.Discord.Core.Models.Interactions.Components;
 using Elixus.Discord.Core.Models.Permissions;
 using Elixus.Discord.Core.Models.Stickers;
 using Elixus.Discord.Core.Models.Users;
@@ -203,7 +203,7 @@ public class Message
 	/// Sent if the message contains components like buttons, action rows, or other interactive components.
 	/// </summary>
 	[JsonPropertyName("components")]
-	public List<MessageComponent> Components { get; set; } = new(0);
+	public List<Component> Components { get; set; } = new(0);
 
 	/// <summary>
 	/// Sent if the message contains stickers.

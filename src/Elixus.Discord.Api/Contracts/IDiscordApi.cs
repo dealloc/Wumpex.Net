@@ -1,6 +1,8 @@
 ﻿using Elixus.Discord.Api.Exceptions;
+using Elixus.Discord.Api.Models.Channels;
 using Elixus.Discord.Api.Models.Gateway;
 using Elixus.Discord.Api.Models.Interactions.ApplicationCommands;
+using Elixus.Discord.Core.Models.Channels;
 using Elixus.Discord.Core.Models.Interactions.ApplicationCommands;
 
 namespace Elixus.Discord.Api.Contracts;
@@ -39,4 +41,6 @@ public interface IDiscordApi
 	/// Returns 204 No Content on success.
 	/// </summary>
 	Task DeleteGlobalApplicationCommand(string id, CancellationToken cancellationToken = default);
+
+	Task<Message> CreateMessage(string channel, CreateMessageRequest request, CancellationToken cancellationToken = default);
 }

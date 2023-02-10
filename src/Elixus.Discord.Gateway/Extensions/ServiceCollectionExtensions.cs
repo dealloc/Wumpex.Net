@@ -1,4 +1,5 @@
 using Elixus.Discord.Core.Events.Gateway;
+using Elixus.Discord.Core.Events.Interactions;
 using Elixus.Discord.Gateway.Contracts;
 using Elixus.Discord.Gateway.Contracts.Events;
 using Elixus.Discord.Gateway.Events;
@@ -6,6 +7,7 @@ using Elixus.Discord.Gateway.Handlers.Events;
 using Elixus.Discord.Gateway.Handlers.Events.Core;
 using Elixus.Discord.Gateway.Hosted;
 using Elixus.Discord.Gateway.Serialization;
+using Elixus.Discord.Gateway.Serialization.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Elixus.Discord.Gateway.Extensions;
@@ -42,5 +44,6 @@ public static class ServiceCollectionExtensions
 
 		// Core
 		services.AddSingleton<IEventHandler<ReadyEvent>, ReadyEventHandler>();
+		services.AddSingleton<IEventSerializer<InteractionCreateEvent>, InteractionCreateEventSerializer>();
 	}
 }

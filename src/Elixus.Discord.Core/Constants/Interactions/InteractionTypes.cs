@@ -1,7 +1,7 @@
 namespace Elixus.Discord.Core.Constants.Interactions;
 
 /// <see href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type" />
-public enum InteractionType
+public enum InteractionTypes
 {
 	/// <summary>
 	/// PING

@@ -3,11 +3,14 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Elixus.Discord.Api.Contracts;
 using Elixus.Discord.Api.Exceptions;
+using Elixus.Discord.Api.Models.Channels;
 using Elixus.Discord.Api.Models.Gateway;
 using Elixus.Discord.Api.Models.Interactions.ApplicationCommands;
 using Elixus.Discord.Api.Serialization;
 using Elixus.Discord.Core.Configurations;
+using Elixus.Discord.Core.Models.Channels;
 using Elixus.Discord.Core.Models.Interactions.ApplicationCommands;
+using Elixus.Discord.Core.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -28,7 +31,7 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 	{
 		_logger = logger;
 		_monitor = monitor;
-		_http = httpClientFactory.CreateClient(Constants.HTTP_CLIENT_NAME);
+		_http = httpClientFactory.CreateClient("elixus.discord.api");
 	}
 
 	/// <inheritdoc cref="IDiscordApi.GetGatewayBotAsync" />
@@ -75,5 +78,24 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 		var response = await _http.DeleteAsync($"{_endpoint}/applications/{_monitor.CurrentValue.ApplicationId}/commands/{id}", cancellationToken);
 
 		response.EnsureSuccessStatusCode();
+	}
+
+	/// <inheritdoc cref="IDiscordApi.CreateMessage" />
+	public async Task<Message> CreateMessage(string channel, CreateMessageRequest request, CancellationToken cancellationToken = default)
+	{
+		var response = await _http.PostAsJsonAsync($"{_endpoint}/channels/{channel}/messages", request, cancellationToken);
+
+		try
+		{
+			response.EnsureSuccessStatusCode();
+			return (await response.Content.ReadFromJsonAsync<Message>(EventSerializerContext.Default.Message, cancellationToken))!;
+		}
+		catch (HttpRequestException exception) when (response.Content.Headers.ContentLength > 0)
+		{
+			var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+			_logger.LogError(exception, "Failed to create global application: {Message}", body);
+			throw;
+		}
 	}
 }

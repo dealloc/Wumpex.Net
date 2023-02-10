@@ -8,7 +8,12 @@ using Elixus.Discord.Core.Models.Users;
 namespace Elixus.Discord.Core.Models.Interactions;
 
 /// <see href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-structure" />
-public class Interaction
+[JsonDerivedType(typeof(ApplicationCommandInteraction), (int)InteractionTypes.ApplicationCommand)]
+[JsonDerivedType(typeof(ApplicationCommandAutocompleteInteraction), (int)InteractionTypes.ApplicationCommandAutocomplete)]
+[JsonDerivedType(typeof(MessageComponentInteraction), (int)InteractionTypes.MessageComponent)]
+[JsonDerivedType(typeof(ModalSubmitInteraction), (int)InteractionTypes.ModalSubmit)]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+public abstract class Interaction
 {
 	/// <summary>
 	/// ID of the interaction.
@@ -26,13 +31,9 @@ public class Interaction
 	/// Type of interaction.
 	/// </summary>
 	[JsonPropertyName("type")]
-	public InteractionType Type { get; set; }
+	public virtual InteractionTypes Type { get; set; } = InteractionTypes.Ping;
 
-	/// <summary>
-	/// Interaction data payload.
-	/// </summary>
-	[JsonPropertyName("data")]
-	public ApplicationCommandData? Data { get; set; }
+	// Data is delegated to sub classes for polymorphic serialization.
 
 	/// <summary>
 	/// Guild that the interaction was sent from.
@@ -103,4 +104,61 @@ public class Interaction
 	/// </summary>
 	[JsonPropertyName("guild_locale")]
 	public string GuildLocale { get; set; } = null!;
+}
+
+/// <summary>
+/// A <see cref="Interaction" /> for <see cref="InteractionTypes.ApplicationCommand" />
+/// </summary>
+public class ApplicationCommandInteraction : Interaction
+{
+	/// <inheritdoc cref="Interaction.Type" />
+	public override InteractionTypes Type { get; set; } = InteractionTypes.ApplicationCommand;
+
+	/// <summary>
+	/// Interaction data payload.
+	/// </summary>
+	/// <seealso href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data" />
+	[JsonPropertyName("data")]
+	public ApplicationCommandData? Data { get; set; }
+}
+
+/// <summary>
+/// A <see cref="Interaction" /> for <see cref="InteractionTypes.ApplicationCommandAutocomplete" />
+/// </summary>
+public sealed class ApplicationCommandAutocompleteInteraction : ApplicationCommandInteraction
+{
+	/// <inheritdoc cref="Interaction.Type" />
+	public override InteractionTypes Type { get; set; } = InteractionTypes.ApplicationCommandAutocomplete;
+}
+
+/// <summary>
+/// A <see cref="Interaction" /> for <see cref="InteractionTypes.MessageComponent" />
+/// </summary>
+public sealed class MessageComponentInteraction : Interaction
+{
+	/// <inheritdoc cref="Interaction.Type" />
+	public override InteractionTypes Type { get; set; } = InteractionTypes.MessageComponent;
+
+	/// <summary>
+	/// Interaction data payload.
+	/// </summary>
+	/// <seealso href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data" />
+	[JsonPropertyName("data")]
+	public MessageComponentData? Data { get; set; }
+}
+
+/// <summary>
+/// A <see cref="Interaction" /> for <see cref="InteractionTypes.ModalSubmit" />
+/// </summary>
+public sealed class ModalSubmitInteraction : Interaction
+{
+	/// <inheritdoc cref="Interaction.Type" />
+	public override InteractionTypes Type { get; set; } = InteractionTypes.ModalSubmit;
+
+	/// <summary>
+	/// Interaction data payload.
+	/// </summary>
+	/// <seealso href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data" />
+	[JsonPropertyName("data")]
+	public ModalSubmitData? Data { get; set; }
 }

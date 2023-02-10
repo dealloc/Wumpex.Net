@@ -6,7 +6,7 @@ namespace Elixus.Discord.Core.Models.Interactions.ApplicationCommands;
 
 /// <see href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data" />
 [DebuggerDisplay("{Name}")]
-public sealed class ApplicationCommandData
+public sealed class ApplicationCommandData : InteractionData
 {
 	/// <summary>
 	/// the ID of the invoked command.

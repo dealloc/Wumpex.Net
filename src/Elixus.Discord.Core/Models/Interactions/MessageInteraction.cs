@@ -18,7 +18,7 @@ public class MessageInteraction
 	/// Type of interaction.
 	/// </summary>
 	[JsonPropertyName("type")]
-	public InteractionType Type { get; set; }
+	public InteractionTypes Type { get; set; }
 
 	/// <summary>
 	/// Name of the application command, including subcommands and subcommand groups.
