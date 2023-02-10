@@ -11,11 +11,19 @@ namespace Elixus.Discord.Core.Models.Interactions.Components;
 /// You can have up to 5 Action Rows per message.
 /// An Action Row cannot contain another <see cref="ActionRowComponent" />.
 /// </remarks>
-public class ActionRowComponent : Component
+public class ActionRowComponent<TComponent> : Component where TComponent : Component
 {
 	/// <summary>
 	/// Contains <see cref="Component" />s.
 	/// </summary>
 	[JsonPropertyName("components")]
-	public List<Component> Components { get; set; } = new(0);
+	public List<TComponent> Components { get; set; } = new(0);
+}
+
+/// <summary>
+/// Default implementation of <see cref="ActionRowComponent{TComponent}" /> allowing all types of <see cref="Component" />.
+/// </summary>
+public class ActionRowComponent : ActionRowComponent<Component>
+{
+	//
 }

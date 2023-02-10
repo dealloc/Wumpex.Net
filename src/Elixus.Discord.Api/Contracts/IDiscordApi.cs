@@ -2,7 +2,9 @@
 using Elixus.Discord.Api.Models.Channels;
 using Elixus.Discord.Api.Models.Gateway;
 using Elixus.Discord.Api.Models.Interactions.ApplicationCommands;
+using Elixus.Discord.Api.Models.Interactions.InteractionResponses;
 using Elixus.Discord.Core.Models.Channels;
+using Elixus.Discord.Core.Models.Interactions;
 using Elixus.Discord.Core.Models.Interactions.ApplicationCommands;
 
 namespace Elixus.Discord.Api.Contracts;
@@ -43,4 +45,6 @@ public interface IDiscordApi
 	Task DeleteGlobalApplicationCommand(string id, CancellationToken cancellationToken = default);
 
 	Task<Message> CreateMessage(string channel, CreateMessageRequest request, CancellationToken cancellationToken = default);
+
+	Task RespondToInteraction(Interaction interaction, InteractionResponse response, CancellationToken cancellationToken = default);
 }

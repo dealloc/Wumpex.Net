@@ -6,9 +6,11 @@ using Elixus.Discord.Api.Exceptions;
 using Elixus.Discord.Api.Models.Channels;
 using Elixus.Discord.Api.Models.Gateway;
 using Elixus.Discord.Api.Models.Interactions.ApplicationCommands;
+using Elixus.Discord.Api.Models.Interactions.InteractionResponses;
 using Elixus.Discord.Api.Serialization;
 using Elixus.Discord.Core.Configurations;
 using Elixus.Discord.Core.Models.Channels;
+using Elixus.Discord.Core.Models.Interactions;
 using Elixus.Discord.Core.Models.Interactions.ApplicationCommands;
 using Elixus.Discord.Core.Serialization;
 using Microsoft.Extensions.Logging;
@@ -95,6 +97,24 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 			var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
 			_logger.LogError(exception, "Failed to create global application: {Message}", body);
+			throw;
+		}
+	}
+
+	/// <inheritdoc cref="IDiscordApi.RespondToInteraction" />
+	public async Task RespondToInteraction(Interaction interaction, InteractionResponse reply, CancellationToken cancellationToken = default)
+	{
+		var response = await _http.PostAsJsonAsync($"{_endpoint}/interactions/{interaction.Id}/{interaction.Token}/callback", reply, cancellationToken: cancellationToken);
+
+		try
+		{
+			response.EnsureSuccessStatusCode();
+		}
+		catch (HttpRequestException exception) when (response.Content.Headers.ContentLength > 0)
+		{
+			var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+			_logger.LogError(exception, "Failed to respond to interaction {Id}: {Message}", interaction.Id, body);
 			throw;
 		}
 	}

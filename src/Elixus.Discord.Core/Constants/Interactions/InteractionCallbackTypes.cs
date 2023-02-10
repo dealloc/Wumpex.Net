@@ -11,7 +11,7 @@ public enum InteractionCallbackTypes
 	/// <summary>
 	/// Respond to an interaction with a message.
 	/// </summary>
-	ChannelWithSource = 4,
+	ChannelMessageWithSource = 4,
 
 	/// <summary>
 	/// ACK an interaction and edit a response later, the user sees a loading state.

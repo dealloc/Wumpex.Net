@@ -16,5 +16,5 @@ public sealed class ModalSubmitData : InteractionData
 	/// The values submitted by the user.
 	/// </summary>
 	[JsonPropertyName("components")]
-	public List<Component> Components { get; set; } = new(0);
+	public List<ActionRowComponent<TextInputComponent>> Components { get; set; } = new(0);
 }

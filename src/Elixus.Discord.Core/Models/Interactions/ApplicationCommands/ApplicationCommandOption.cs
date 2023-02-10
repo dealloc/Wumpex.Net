@@ -12,7 +12,7 @@ namespace Elixus.Discord.Core.Models.Interactions.ApplicationCommands;
 [JsonDerivedType(typeof(ApplicationCommandOptionWithNumericChoices<long>), (int)ApplicationCommandOptionTypes.Integer)]
 [JsonDerivedType(typeof(ApplicationCommandOptionWithNumericChoices<double>), (int)ApplicationCommandOptionTypes.Number)]
 [JsonDerivedType(typeof(ApplicationCommandOptionWithOptions), (int)ApplicationCommandOptionTypes.SubCommand)]
-[JsonDerivedType(typeof(ApplicationCommandOptionGroupWithOptions), (int)ApplicationCommandOptionTypes.SubCommandGroup)] // TODO multiple types
+[JsonDerivedType(typeof(ApplicationCommandOptionGroupWithOptions), (int)ApplicationCommandOptionTypes.SubCommandGroup)]
 [JsonDerivedType(typeof(ApplicationCommandOptionWithChannelTypes), (int)ApplicationCommandOptionTypes.Channel)]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type", UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType, IgnoreUnrecognizedTypeDiscriminators = true)]
 public class ApplicationCommandOption

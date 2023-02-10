@@ -19,7 +19,7 @@ namespace Elixus.Discord.Core.Models.Interactions.Components;
 [JsonDerivedType(typeof(MentionableSelectMenuComponent), (int)ComponentTypes.MentionableSelect)]
 [JsonDerivedType(typeof(ChannelSelectMenuComponent), (int)ComponentTypes.ChannelSelect)]
 [JsonDerivedType(typeof(TextInputComponent), (int)ComponentTypes.TextInput)]
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type", UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization)]
 public abstract class Component
 {
 	/// <summary>
