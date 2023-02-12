@@ -3,6 +3,7 @@ using Wumpex.Net.Core.Events.Gateway;
 using Wumpex.Net.Core.Events.Interactions;
 using Wumpex.Net.Gateway.Contracts;
 using Wumpex.Net.Gateway.Contracts.Events;
+using Wumpex.Net.Gateway.Dispatch;
 using Wumpex.Net.Gateway.Events;
 using Wumpex.Net.Gateway.Handlers.Events;
 using Wumpex.Net.Gateway.Handlers.Events.Core;
@@ -25,8 +26,11 @@ public static class ServiceCollectionExtensions
 		services.AddSingleton<HostedHeartbeatService>();
 		services.AddSingleton<IHeartbeatService>(provider => provider.GetRequiredService<HostedHeartbeatService>());
 		services.AddHostedService(provider => provider.GetRequiredService<HostedHeartbeatService>());
-		services.AddSingleton(typeof(IEventSerializer<>), typeof(CoreEventSerializer<>));
 
+		services.AddSingleton<HostedWorkerPool>();
+		services.AddHostedService(provider => provider.GetRequiredService<HostedWorkerPool>());
+
+		services.AddSingleton(typeof(IEventSerializer<>), typeof(CoreEventSerializer<>));
 		services.AddSingleton<IDiscordGateway, DefaultDiscordGateway>();
 		services.AddSingleton<IDispatchEventHandler, DispatchEventHandler>();
 		services.AddSingleton<IEventHandler<HelloEvent>, HelloEventHandler>();

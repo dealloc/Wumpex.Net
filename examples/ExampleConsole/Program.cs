@@ -15,7 +15,7 @@ await Host.CreateDefaultBuilder()
 		services.AddWumpexCore(host.Configuration.GetSection("Wumpex.Net"));
 		services.AddWumpexApi();
 		services.AddWumpexGateway();
-		services.AddDiscordIntents(GatewayIntents.Guilds, GatewayIntents.GuildMessages);
+		services.AddDiscordIntents(GatewayIntents.Guilds, GatewayIntents.GuildMessages, GatewayIntents.DirectMessages);
 		services.AddHostedService<HostedDiscordService>();
 		services.AddScoped<IEventHandler<InteractionCreateEvent>, InteractionEventHandler>();
 	})

@@ -12,4 +12,9 @@ public sealed class DiscordGatewayConfiguration
 	/// This directly controls which events Discord will sent to your bot.
 	/// </summary>
 	public GatewayIntents Intents { get; set; } = GatewayIntents.Default;
+
+	/// <summary>
+	/// The amount of workers to run in the background for processing dispatch events.
+	/// </summary>
+	public int WorkerCount { get; set; } = 5;
 }

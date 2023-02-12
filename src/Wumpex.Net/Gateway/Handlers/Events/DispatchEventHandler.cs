@@ -5,7 +5,9 @@ using Wumpex.Net.Core.Events.Gateway;
 using Wumpex.Net.Core.Events.Guilds;
 using Wumpex.Net.Core.Events.Interactions;
 using Wumpex.Net.Core.Events.Messages;
+using Wumpex.Net.Gateway.Contracts;
 using Wumpex.Net.Gateway.Contracts.Events;
+using Wumpex.Net.Gateway.Dispatch;
 using Wumpex.Net.Gateway.Events.Base;
 
 namespace Wumpex.Net.Gateway.Handlers.Events;
@@ -14,6 +16,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 {
 	private readonly ILogger<DispatchEventHandler> _logger;
 	private readonly IServiceScopeFactory _serviceScopeFactory;
+	private readonly HostedWorkerPool _workerPool;
 	private readonly IEventSerializer<ReadyEvent> _readySerializer;
 	private readonly IEventSerializer<GuildCreateEvent> _guildCreateSerializer;
 	private readonly IEventSerializer<GuildDeleteEvent> _guildDeleteSerializer;
@@ -25,6 +28,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 
 	public DispatchEventHandler(ILogger<DispatchEventHandler> logger,
 		IServiceScopeFactory serviceScopeFactory,
+		HostedWorkerPool workerPool,
 		IEventSerializer<ReadyEvent> readySerializer,
 		IEventSerializer<GuildCreateEvent> guildCreateSerializer,
 		IEventSerializer<GuildDeleteEvent> guildDeleteSerializer,
@@ -36,6 +40,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	{
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
+		_workerPool = workerPool;
 		_readySerializer = readySerializer;
 		_guildCreateSerializer = guildCreateSerializer;
 		_guildDeleteSerializer = guildDeleteSerializer;
@@ -67,18 +72,23 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	/// Actually performs the dispatch, wrapping the handler in it's own service scope.
 	/// Since this method needs to be async (for the scope lifetime) we need it separate from <see cref="HandleDispatch" />, which takes a <see cref="ReadOnlySpan{T}" />.
 	/// </summary>
-	private async ValueTask ScopedDispatch<TEvent>(EventContext context, TEvent @event, CancellationToken cancellationToken) where TEvent : class
+	private ValueTask ScopedDispatch<TEvent>(EventContext context, TEvent @event, CancellationToken cancellationToken) where TEvent : class
 	{
-		await using var scope = _serviceScopeFactory.CreateAsyncScope();
-		var handler = scope.ServiceProvider.GetService<IEventHandler<TEvent>>();
-
-		if (handler is null)
+		return _workerPool.QueueDispatch(async (stoppingToken) =>
 		{
-			_logger.LogWarning("No handlers registered for {EventType}", @event.GetType().FullName);
+			await using var scope = _serviceScopeFactory.CreateAsyncScope();
+			var handler = scope.ServiceProvider.GetService<IEventHandler<TEvent>>();
+			var heartbeat = scope.ServiceProvider.GetRequiredService<IHeartbeatService>();
 
-			return;
-		}
+			if (handler is null)
+			{
+				_logger.LogWarning("No handlers registered for {EventType}", @event.GetType().FullName);
 
-		await handler.HandleEvent(@event, context, cancellationToken);
+				return;
+			}
+
+			await handler.HandleEvent(@event, context, stoppingToken);
+			await heartbeat.Notify(context.Sequence, stoppingToken);
+		}, context, cancellationToken);
 	}
 }
