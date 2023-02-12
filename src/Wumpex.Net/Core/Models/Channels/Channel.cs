@@ -6,7 +6,7 @@ using Wumpex.Net.Core.Models.Users;
 namespace Wumpex.Net.Core.Models.Channels;
 
 /// <see href="https://discord.com/developers/docs/resources/channel#channel-object" />
-public sealed class Channel
+public class Channel
 {
 	/// <summary>
 	/// The id of this channel.

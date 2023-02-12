@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Wumpex.Net.Core.Events.Channels;
 using Wumpex.Net.Core.Events.Gateway;
 using Wumpex.Net.Core.Events.Guilds;
 using Wumpex.Net.Core.Events.Interactions;
@@ -19,6 +20,8 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	private readonly IEventSerializer<MessageCreateEvent> _messageCreateSerializer;
 	private readonly IEventSerializer<MessageDeleteEvent> _messageDeleteSerializer;
 	private readonly IEventSerializer<InteractionCreateEvent> _interactionCreateSerializer;
+	private readonly IEventSerializer<ChannelCreateEvent> _channelCreateSerializer;
+	private readonly IEventSerializer<ChannelDeleteEvent> _channelDeleteSerializer;
 
 	public DispatchEventHandler(ILogger<DispatchEventHandler> logger,
 		IServiceScopeFactory serviceScopeFactory,
@@ -27,7 +30,9 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		IEventSerializer<GuildDeleteEvent> guildDeleteSerializer,
 		IEventSerializer<MessageCreateEvent> messageCreateSerializer,
 		IEventSerializer<MessageDeleteEvent> messageDeleteSerializer,
-		IEventSerializer<InteractionCreateEvent> interactionCreateSerializer)
+		IEventSerializer<InteractionCreateEvent> interactionCreateSerializer,
+		IEventSerializer<ChannelCreateEvent> channelCreateSerializer,
+		IEventSerializer<ChannelDeleteEvent> channelDeleteSerializer)
 	{
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
@@ -37,6 +42,8 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		_messageCreateSerializer = messageCreateSerializer;
 		_messageDeleteSerializer = messageDeleteSerializer;
 		_interactionCreateSerializer = interactionCreateSerializer;
+		_channelCreateSerializer = channelCreateSerializer;
+		_channelDeleteSerializer = channelDeleteSerializer;
 	}
 
 	/// <inheritdoc cref="IDispatchEventHandler.HandleDispatch" />
@@ -50,6 +57,8 @@ internal class DispatchEventHandler : IDispatchEventHandler
 			"MESSAGE_CREATE" => ScopedDispatch(context, _messageCreateSerializer.Deserialize(payload), cancellationToken),
 			"MESSAGE_DELETE" => ScopedDispatch(context, _messageDeleteSerializer.Deserialize(payload), cancellationToken),
 			"INTERACTION_CREATE" => ScopedDispatch(context, _interactionCreateSerializer.Deserialize(payload), cancellationToken),
+			"CHANNEL_CREATE" => ScopedDispatch(context, _channelCreateSerializer.Deserialize(payload), cancellationToken),
+			"CHANNEL_DELETE" => ScopedDispatch(context, _channelDeleteSerializer.Deserialize(payload), cancellationToken),
 			_ => throw new NotSupportedException($"Unknown event '{context.EventName}' received")
 		};
 	}
