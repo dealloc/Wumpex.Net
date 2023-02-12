@@ -9,6 +9,7 @@ using Wumpex.Net.Api.Models.Channels;
 using Wumpex.Net.Api.Models.Gateway;
 using Wumpex.Net.Api.Models.Interactions.ApplicationCommands;
 using Wumpex.Net.Api.Models.Interactions.InteractionResponses;
+using Wumpex.Net.Api.Models.Webhooks;
 using Wumpex.Net.Api.Serialization;
 using Wumpex.Net.Core.Configurations;
 using Wumpex.Net.Core.Models.Channels;
@@ -52,7 +53,7 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 		try
 		{
 			response.EnsureSuccessStatusCode();
-			return (await response.Content.ReadFromJsonAsync(ApiSerializerContext.Default.ApplicationCommand, cancellationToken))!;
+			return await response.Content.ReadFromJsonAsync(ApiSerializerContext.Default.ApplicationCommand, cancellationToken)  ?? throw new UnexpectedResponseException($"{_endpoint}/applications/{_monitor.CurrentValue.ApplicationId}/commands");
 		}
 		catch (HttpRequestException exception) when (response.Content.Headers.ContentLength > 0)
 		{
@@ -90,7 +91,7 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 		try
 		{
 			response.EnsureSuccessStatusCode();
-			return (await response.Content.ReadFromJsonAsync(EventSerializerContext.Default.Message, cancellationToken))!;
+			return await response.Content.ReadFromJsonAsync(EventSerializerContext.Default.Message, cancellationToken) ?? throw new UnexpectedResponseException($"{_endpoint}/channels/{channel}/messages");
 		}
 		catch (HttpRequestException exception) when (response.Content.Headers.ContentLength > 0)
 		{
@@ -115,6 +116,52 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 			var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
 			_logger.LogError(exception, "Failed to respond to interaction {Id}: {Message}", interaction.Id, body);
+			throw;
+		}
+	}
+
+	/// <inheritdoc cref="IDiscordApi.FollowUpInteraction" />
+	public async Task<Message> FollowUpInteraction(Interaction interaction, ExecuteWebhookRequest request, CancellationToken cancellationToken = default)
+	{
+		var requestUri = $"{_endpoint}/webhooks/{_monitor.CurrentValue.ApplicationId}/{interaction.Token}";
+		if (string.IsNullOrWhiteSpace(request.ThreadId) is false)
+			requestUri = $"{requestUri}?thread_id={request.ThreadId}";
+		if (request.Wait is not null)
+			requestUri = $"{requestUri}{(requestUri.Contains('?') ? '&' : '?')}wait={request.Wait}";
+
+		var response = await _http.PostAsJsonAsync(requestUri, request, cancellationToken: cancellationToken);
+
+		try
+		{
+			response.EnsureSuccessStatusCode();
+			return await response.Content.ReadFromJsonAsync<Message>(cancellationToken: cancellationToken) ?? throw new UnexpectedResponseException(requestUri);
+		}
+		catch (HttpRequestException exception) when (response.Content.Headers.ContentLength > 0)
+		{
+			var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+			_logger.LogError(exception, "Failed to follow up on interaction {Id}: {Message}", interaction.Id, body);
+			throw;
+		}
+	}
+
+	public async Task EditFollowUpInteraction(Interaction interaction, Message message, EditWebhookMessageRequest request, CancellationToken cancellationToken = default)
+	{
+		var requestUri = $"{_endpoint}/webhooks/{_monitor.CurrentValue.ApplicationId}/{interaction.Token}";
+		if (string.IsNullOrWhiteSpace(request.ThreadId) is false)
+			requestUri = $"{requestUri}?thread_id={request.ThreadId}";
+
+		var response = await _http.PostAsJsonAsync(requestUri, request, cancellationToken: cancellationToken);
+
+		try
+		{
+			response.EnsureSuccessStatusCode();
+		}
+		catch (HttpRequestException exception) when (response.Content.Headers.ContentLength > 0)
+		{
+			var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+			_logger.LogError(exception, "Failed to edit follow up on interaction {Id}: {Message}", interaction.Id, body);
 			throw;
 		}
 	}

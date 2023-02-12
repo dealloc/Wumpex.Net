@@ -3,6 +3,7 @@ using Wumpex.Net.Api.Models.Channels;
 using Wumpex.Net.Api.Models.Gateway;
 using Wumpex.Net.Api.Models.Interactions.ApplicationCommands;
 using Wumpex.Net.Api.Models.Interactions.InteractionResponses;
+using Wumpex.Net.Api.Models.Webhooks;
 using Wumpex.Net.Core.Models.Channels;
 using Wumpex.Net.Core.Models.Interactions;
 using Wumpex.Net.Core.Models.Interactions.ApplicationCommands;
@@ -62,4 +63,23 @@ public interface IDiscordApi
 	/// </summary>
 	/// <seealso href="https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction" />
 	Task RespondToInteraction(Interaction interaction, InteractionResponse response, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Create a followup message for an Interaction.
+	/// Functions the same as Execute Webhook, but wait is always true.
+	/// The thread_id, avatar_url, and username parameters are not supported when using this endpoint for interaction followups.
+	/// </summary>
+	/// <remarks>
+	/// flags can be set to 64 to mark the message as ephemeral, except when it is the first followup message to a deferred Interactions Response.
+	/// In that case, the flags field will be ignored, and the ephemerality of the message will be determined by the flags value in your original ACK.
+	/// </remarks>
+	/// <see href="https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response" />
+	Task<Message> FollowUpInteraction(Interaction interaction, ExecuteWebhookRequest request, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Edits a followup message for an Interaction.
+	/// Functions the same as Edit Webhook Message.
+	/// </summary>
+	/// <see href="https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response" />
+	Task EditFollowUpInteraction(Interaction interaction, Message message, EditWebhookMessageRequest request, CancellationToken cancellationToken = default);
 }
