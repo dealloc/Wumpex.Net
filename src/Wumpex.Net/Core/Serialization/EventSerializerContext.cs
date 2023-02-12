@@ -14,6 +14,7 @@ namespace Wumpex.Net.Core.Serialization;
 [JsonSerializable(typeof(ReadyEvent))]
 [JsonSerializable(typeof(GuildCreateEvent))]
 [JsonSerializable(typeof(MessageCreateEvent))]
+[JsonSerializable(typeof(MessageDeleteEvent))]
 [JsonSerializable(typeof(InteractionCreateEvent))]
 public partial class EventSerializerContext : JsonSerializerContext
 {

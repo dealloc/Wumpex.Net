@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Wumpex.Net.Core.Models.Users;
 using Wumpex.Net.Core.Attributes;
 using Wumpex.Net.Core.Constants.Gateway;
 using Wumpex.Net.Core.Models.Channels;

@@ -16,6 +16,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	private readonly IEventSerializer<ReadyEvent> _readySerializer;
 	private readonly IEventSerializer<GuildCreateEvent> _guildCreateSerializer;
 	private readonly IEventSerializer<MessageCreateEvent> _messageCreateSerializer;
+	private readonly IEventSerializer<MessageDeleteEvent> _messageDeleteSerializer;
 	private readonly IEventSerializer<InteractionCreateEvent> _interactionCreateSerializer;
 
 	public DispatchEventHandler(ILogger<DispatchEventHandler> logger,
@@ -23,6 +24,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		IEventSerializer<ReadyEvent> readySerializer,
 		IEventSerializer<GuildCreateEvent> guildCreateSerializer,
 		IEventSerializer<MessageCreateEvent> messageCreateSerializer,
+		IEventSerializer<MessageDeleteEvent> messageDeleteSerializer,
 		IEventSerializer<InteractionCreateEvent> interactionCreateSerializer)
 	{
 		_logger = logger;
@@ -30,6 +32,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		_readySerializer = readySerializer;
 		_guildCreateSerializer = guildCreateSerializer;
 		_messageCreateSerializer = messageCreateSerializer;
+		_messageDeleteSerializer = messageDeleteSerializer;
 		_interactionCreateSerializer = interactionCreateSerializer;
 	}
 
@@ -41,6 +44,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 			"READY" => ScopedDispatch(context, _readySerializer.Deserialize(payload), cancellationToken),
 			"GUILD_CREATE" => ScopedDispatch(context, _guildCreateSerializer.Deserialize(payload), cancellationToken),
 			"MESSAGE_CREATE" => ScopedDispatch(context, _messageCreateSerializer.Deserialize(payload), cancellationToken),
+			"MESSAGE_DELETE" => ScopedDispatch(context, _messageDeleteSerializer.Deserialize(payload), cancellationToken),
 			"INTERACTION_CREATE" => ScopedDispatch(context, _interactionCreateSerializer.Deserialize(payload), cancellationToken),
 			_ => throw new NotSupportedException($"Unknown event '{context.EventName}' received")
 		};
