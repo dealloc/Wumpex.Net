@@ -21,5 +21,5 @@ public class UnavailableGuild
 	/// </summary>
 	/// <see href="https://discord.com/developers/docs/resources/guild#unavailable-guild-object" />
 	[JsonPropertyName("unavailable")]
-	public virtual bool Unavailable { get; } = true;
+	public virtual bool? Unavailable { get; set; }
 }

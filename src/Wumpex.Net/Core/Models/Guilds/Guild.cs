@@ -259,4 +259,7 @@ public class Guild : UnavailableGuild
 	/// </summary>
 	[JsonPropertyName("premium_progress_bar_enabled")]
 	public bool PremiumProgressBarEnabled { get; set; }
+
+	/// <inheritdoc cref="Unavailable" />
+	public override bool? Unavailable { get; set; } = true;
 }

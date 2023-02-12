@@ -13,6 +13,7 @@ namespace Wumpex.Net.Core.Serialization;
 [JsonSourceGenerationOptions]
 [JsonSerializable(typeof(ReadyEvent))]
 [JsonSerializable(typeof(GuildCreateEvent))]
+[JsonSerializable(typeof(GuildDeleteEvent))]
 [JsonSerializable(typeof(MessageCreateEvent))]
 [JsonSerializable(typeof(MessageDeleteEvent))]
 [JsonSerializable(typeof(InteractionCreateEvent))]

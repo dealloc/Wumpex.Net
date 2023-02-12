@@ -15,6 +15,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly IEventSerializer<ReadyEvent> _readySerializer;
 	private readonly IEventSerializer<GuildCreateEvent> _guildCreateSerializer;
+	private readonly IEventSerializer<GuildDeleteEvent> _guildDeleteSerializer;
 	private readonly IEventSerializer<MessageCreateEvent> _messageCreateSerializer;
 	private readonly IEventSerializer<MessageDeleteEvent> _messageDeleteSerializer;
 	private readonly IEventSerializer<InteractionCreateEvent> _interactionCreateSerializer;
@@ -23,6 +24,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		IServiceScopeFactory serviceScopeFactory,
 		IEventSerializer<ReadyEvent> readySerializer,
 		IEventSerializer<GuildCreateEvent> guildCreateSerializer,
+		IEventSerializer<GuildDeleteEvent> guildDeleteSerializer,
 		IEventSerializer<MessageCreateEvent> messageCreateSerializer,
 		IEventSerializer<MessageDeleteEvent> messageDeleteSerializer,
 		IEventSerializer<InteractionCreateEvent> interactionCreateSerializer)
@@ -31,6 +33,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		_serviceScopeFactory = serviceScopeFactory;
 		_readySerializer = readySerializer;
 		_guildCreateSerializer = guildCreateSerializer;
+		_guildDeleteSerializer = guildDeleteSerializer;
 		_messageCreateSerializer = messageCreateSerializer;
 		_messageDeleteSerializer = messageDeleteSerializer;
 		_interactionCreateSerializer = interactionCreateSerializer;
@@ -43,6 +46,7 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		{
 			"READY" => ScopedDispatch(context, _readySerializer.Deserialize(payload), cancellationToken),
 			"GUILD_CREATE" => ScopedDispatch(context, _guildCreateSerializer.Deserialize(payload), cancellationToken),
+			"GUILD_DELETE" => ScopedDispatch(context, _guildDeleteSerializer.Deserialize(payload), cancellationToken),
 			"MESSAGE_CREATE" => ScopedDispatch(context, _messageCreateSerializer.Deserialize(payload), cancellationToken),
 			"MESSAGE_DELETE" => ScopedDispatch(context, _messageDeleteSerializer.Deserialize(payload), cancellationToken),
 			"INTERACTION_CREATE" => ScopedDispatch(context, _interactionCreateSerializer.Deserialize(payload), cancellationToken),
