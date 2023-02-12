@@ -1,11 +1,11 @@
-using Elixus.Discord.Api.Contracts;
-using Elixus.Discord.Api.Models.Interactions.InteractionResponses;
-using Elixus.Discord.Core.Constants.Interactions;
-using Elixus.Discord.Core.Events.Interactions;
-using Elixus.Discord.Core.Models.Interactions;
-using Elixus.Discord.Core.Models.Interactions.Components;
-using Elixus.Discord.Gateway.Contracts.Events;
-using Elixus.Discord.Gateway.Events.Base;
+using Wumpex.Net.Api.Contracts;
+using Wumpex.Net.Api.Models.Interactions.InteractionResponses;
+using Wumpex.Net.Core.Constants.Interactions;
+using Wumpex.Net.Core.Events.Interactions;
+using Wumpex.Net.Core.Models.Interactions;
+using Wumpex.Net.Core.Models.Interactions.Components;
+using Wumpex.Net.Gateway.Contracts.Events;
+using Wumpex.Net.Gateway.Events.Base;
 using Microsoft.Extensions.Logging;
 
 namespace ExampleConsole.Handlers.Interactions;

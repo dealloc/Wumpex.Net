@@ -1,20 +1,20 @@
-﻿using Elixus.Discord.Api.Extensions;
-using Elixus.Discord.Core.Constants.Gateway;
-using Elixus.Discord.Core.Events.Interactions;
-using Elixus.Discord.Core.Extensions;
-using Elixus.Discord.Gateway.Contracts.Events;
-using Elixus.Discord.Gateway.Extensions;
-using Elixus.Discord.Hosted;
+﻿using Wumpex.Net.Api.Extensions;
+using Wumpex.Net.Core.Constants.Gateway;
+using Wumpex.Net.Core.Events.Interactions;
+using Wumpex.Net.Core.Extensions;
+using Wumpex.Net.Gateway.Contracts.Events;
+using Wumpex.Net.Gateway.Extensions;
 using ExampleConsole.Handlers.Interactions;
+using ExampleConsole.Hosted;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 await Host.CreateDefaultBuilder()
 	.ConfigureServices((host, services) =>
 	{
-		services.AddElixusDiscordCore(host.Configuration.GetSection("Elixus.Discord"));
-		services.AddElixusDiscordApi();
-		services.AddElixusDiscordGateway();
+		services.AddWumpexCore(host.Configuration.GetSection("Wumpex.Net"));
+		services.AddWumpexApi();
+		services.AddWumpexGateway();
 		services.AddDiscordIntents(GatewayIntents.Guilds, GatewayIntents.GuildMessages);
 		services.AddHostedService<HostedDiscordService>();
 		services.AddScoped<IEventHandler<InteractionCreateEvent>, InteractionEventHandler>();
