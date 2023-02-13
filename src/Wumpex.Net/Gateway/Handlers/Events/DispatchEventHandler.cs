@@ -81,17 +81,23 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		return _workerPool.QueueDispatch(async (stoppingToken) =>
 		{
 			await using var scope = _serviceScopeFactory.CreateAsyncScope();
-			var handler = scope.ServiceProvider.GetService<IEventHandler<TEvent>>();
 			var heartbeat = scope.ServiceProvider.GetRequiredService<IHeartbeatService>();
+			var handlers = scope
+				.ServiceProvider
+				.GetRequiredService<IEnumerable<IEventHandler<TEvent>>>()
+				.ToList();
 
-			if (handler is null)
+			if (handlers.Count is 0)
 			{
 				_logger.LogWarning("No handlers registered for {EventType}", @event.GetType().FullName);
 
 				return;
 			}
 
-			await handler.HandleEvent(@event, context, stoppingToken);
+			await Task.WhenAll(
+				handlers.Select(handler => handler.HandleEvent(@event, context, stoppingToken).AsTask())
+			);
+
 			await heartbeat.Notify(context.Sequence, stoppingToken);
 		}, context, cancellationToken);
 	}
