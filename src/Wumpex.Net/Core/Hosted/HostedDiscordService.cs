@@ -1,10 +1,12 @@
-﻿using Wumpex.Net.Api.Contracts;
-using Wumpex.Net.Core.Exceptions;
-using Wumpex.Net.Gateway.Contracts;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Wumpex.Net.Api.Contracts;
+using Wumpex.Net.Core.Contracts;
+using Wumpex.Net.Core.Exceptions;
+using Wumpex.Net.Core.Services;
+using Wumpex.Net.Gateway.Contracts;
 
-namespace ExampleConsole.Hosted;
+namespace Wumpex.Net.Core.Hosted;
 
 /// <summary>
 /// Runs the main Discord services from a .NET background service.
@@ -12,15 +14,17 @@ namespace ExampleConsole.Hosted;
 public sealed class HostedDiscordService : BackgroundService
 {
 	private readonly ILogger<HostedDiscordService> _logger;
+	private readonly IWumpex _wumpex;
 	private readonly IDiscordApi _discordApi;
 	private readonly IDiscordGateway _gateway;
 
 	/// <summary>
 	/// Creates a new instance of <see cref="HostedDiscordService" />.
 	/// </summary>
-	public HostedDiscordService(ILogger<HostedDiscordService> logger, IDiscordApi discordApi, IDiscordGateway gateway)
+	public HostedDiscordService(ILogger<HostedDiscordService> logger, IWumpex wumpex, IDiscordApi discordApi, IDiscordGateway gateway)
 	{
 		_logger = logger;
+		_wumpex = wumpex;
 		_discordApi = discordApi;
 		_gateway = gateway;
 	}
@@ -30,8 +34,10 @@ public sealed class HostedDiscordService : BackgroundService
 	{
 		// linked allows us to manually cancel pending async.
 		var linked = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-		var response = await _discordApi.GetGatewayBotAsync(linked.Token);
-		var endpoint = response.Url;
+
+		_wumpex.User = _discordApi.GetCurrentUser(linked.Token);
+		var gateway = await _discordApi.GetGatewayBotAsync(linked.Token);
+		var endpoint = gateway.Url;
 
 		while (stoppingToken.IsCancellationRequested is false)
 		{

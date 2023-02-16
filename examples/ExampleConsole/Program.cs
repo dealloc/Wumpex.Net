@@ -5,9 +5,9 @@ using Wumpex.Net.Core.Extensions;
 using Wumpex.Net.Gateway.Contracts.Events;
 using Wumpex.Net.Gateway.Extensions;
 using ExampleConsole.Handlers.Interactions;
-using ExampleConsole.Hosted;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Wumpex.Net.Core.Hosted;
 
 await Host.CreateDefaultBuilder()
 	.ConfigureServices((host, services) =>

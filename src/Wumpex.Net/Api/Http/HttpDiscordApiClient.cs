@@ -15,6 +15,7 @@ using Wumpex.Net.Core.Configurations;
 using Wumpex.Net.Core.Models.Channels;
 using Wumpex.Net.Core.Models.Interactions;
 using Wumpex.Net.Core.Models.Interactions.ApplicationCommands;
+using Wumpex.Net.Core.Models.Users;
 using Wumpex.Net.Core.Serialization;
 
 namespace Wumpex.Net.Api.Http;
@@ -43,6 +44,14 @@ internal sealed class HttpDiscordApiClient : IDiscordApi
 		var response = await _http.GetFromJsonAsync<GatewayBotResponse>($"{_endpoint}/gateway/bot", cancellationToken);
 
 		return response ?? throw new UnexpectedResponseException("/gateway/bot");
+	}
+
+	/// <inheritdoc cref="IDiscordApi.GetCurrentUser" />
+	public async Task<User> GetCurrentUser(CancellationToken cancellationToken = default)
+	{
+		var response = await _http.GetFromJsonAsync<User>($"{_endpoint}/users/@me", cancellationToken);
+
+		return response ?? throw new UnexpectedResponseException("/users/@me");
 	}
 
 	/// <inheritdoc cref="IDiscordApi.CreateGlobalApplicationCommand" />

@@ -1,8 +1,11 @@
 ﻿using Wumpex.Net.Core.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Wumpex.Net.Core.Configurations;
 using Wumpex.Net.Core.Constants.Gateway;
+using Wumpex.Net.Core.Contracts;
+using Wumpex.Net.Core.Services;
 
 namespace Wumpex.Net.Core.Extensions;
 
@@ -17,6 +20,7 @@ public static class ServiceCollectionExtensions
 	public static void AddWumpexCore(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<DiscordConfiguration>(configuration);
+		services.AddSingleton<IWumpex, DefaultWumpex>();
 	}
 
 	/// <summary>

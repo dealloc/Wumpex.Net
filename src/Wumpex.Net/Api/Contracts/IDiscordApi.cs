@@ -7,6 +7,7 @@ using Wumpex.Net.Api.Models.Webhooks;
 using Wumpex.Net.Core.Models.Channels;
 using Wumpex.Net.Core.Models.Interactions;
 using Wumpex.Net.Core.Models.Interactions.ApplicationCommands;
+using Wumpex.Net.Core.Models.Users;
 
 namespace Wumpex.Net.Api.Contracts;
 
@@ -21,6 +22,14 @@ public interface IDiscordApi
 	/// <exception cref="UnexpectedResponseException">Thrown if the gateway returns an unexpected response.</exception>
 	/// <seealso href="https://discord.com/developers/docs/topics/gateway#get-gateway-bot" />
 	Task<GatewayBotResponse> GetGatewayBotAsync(CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Returns the user object of the requester's account.
+	/// For OAuth2, this requires the identify scope, which will return the object without an email, and optionally the email scope, which returns the object with an email.
+	/// </summary>
+	/// <exception cref="UnexpectedResponseException">Thrown if the gateway returns an unexpected response.</exception>
+	/// <seealso href="https://discord.com/developers/docs/resources/user#get-current-user" />
+	Task<User> GetCurrentUser(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten).
