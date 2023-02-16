@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Wumpex.Net.Core.Events.Voice;
 using Wumpex.Net.Gateway.Events;
 using Wumpex.Net.Gateway.Events.Base;
 
@@ -13,6 +14,7 @@ namespace Wumpex.Net.Gateway.Serialization.Contexts;
 [JsonSerializable(typeof(InvalidSessionEvent))]
 [JsonSerializable(typeof(GatewayEvent<IdentifyEvent>))]
 [JsonSerializable(typeof(GatewayEvent<ResumeEvent>))]
+[JsonSerializable(typeof(GatewayEvent<VoiceStateUpdateEvent>))]
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class GatewayEventSerializerContext : JsonSerializerContext
 {

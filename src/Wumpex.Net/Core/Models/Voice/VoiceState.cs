@@ -7,7 +7,7 @@ namespace Wumpex.Net.Core.Models.Voice;
 /// Used to represent a user's voice connection status.
 /// </summary>
 /// <see href="https://discord.com/developers/docs/resources/voice#voice-state-object" />
-public sealed class VoiceState
+public class VoiceState
 {
 	/// <summary>
 	/// The guild id this voice state is for.
@@ -31,6 +31,7 @@ public sealed class VoiceState
 	/// The guild member this voice state is for.
 	/// </summary>
 	[JsonPropertyName("member")]
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public GuildMember? Member { get; set; }
 
 	/// <summary>

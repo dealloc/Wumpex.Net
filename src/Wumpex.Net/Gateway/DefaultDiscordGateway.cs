@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
+using Wumpex.Net.Core.Events.Voice;
 using Wumpex.Net.Core.Exceptions;
 using Wumpex.Net.Gateway.Constants;
 using Wumpex.Net.Gateway.Contracts;
@@ -42,6 +43,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 	private readonly Lazy<IEventHandler<InvalidSessionEvent>> _invalidSessionHandler;
 	private readonly IEventSerializer<HeartbeatAckEvent> _heartbeatAckSerializer;
 	private readonly Lazy<IEventHandler<HeartbeatAckEvent>> _heartbeatAckHandler;
+	private readonly IEventSerializer<VoiceStateUpdateEvent> _voiceStateUpdateSerializer;
 	private readonly IEventSerializer<IdentifyEvent> _identifySerializer;
 	private readonly IDispatchEventHandler _dispatchEventHandler;
 
@@ -54,6 +56,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		SingleWriter = true,
 		FullMode = BoundedChannelFullMode.Wait
 	});
+
 
 	/// <remarks>
 	/// Including a serializer and a handler directly instead of resolving from the container at runtime has two purposes:
@@ -68,6 +71,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		IEventSerializer<InvalidSessionEvent> invalidSessionSerializer,
 		IEventSerializer<HeartbeatAckEvent> heartbeatAckSerializer,
 		IEventSerializer<IdentifyEvent> identifySerializer,
+		IEventSerializer<VoiceStateUpdateEvent> voiceStateUpdateSerializer,
 		IDispatchEventHandler dispatchEventHandler)
 	{
 		_logger = logger;
@@ -77,6 +81,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 		_invalidSessionSerializer = invalidSessionSerializer;
 		_heartbeatAckSerializer = heartbeatAckSerializer;
 		_identifySerializer = identifySerializer;
+		_voiceStateUpdateSerializer = voiceStateUpdateSerializer;
 		_dispatchEventHandler = dispatchEventHandler;
 
 		// some services might refer to the gateway, so if we directly inject them we'll create a circular dependency
@@ -177,6 +182,7 @@ internal sealed class DefaultDiscordGateway : IDiscordGateway, IDisposable
 			InvalidSessionEvent invalid => _invalidSessionSerializer.Serialize(invalid),
 			HeartbeatAckEvent heartbeat => _heartbeatAckSerializer.Serialize(heartbeat),
 			IdentifyEvent identify => _identifySerializer.Serialize(identify),
+			VoiceStateUpdateEvent voiceStateUpdateEvent => _voiceStateUpdateSerializer.Serialize(voiceStateUpdateEvent),
 			_ => throw new NotSupportedException($"Cannot send {@event.GetType().FullName} over gateway, no known serializer")
 		};
 

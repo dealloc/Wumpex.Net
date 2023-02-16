@@ -21,7 +21,7 @@ public class ApplicationCommandOption
 	/// Type of option.
 	/// </summary>
 	[JsonPropertyName("type")]
-	public ApplicationCommandOptionTypes Type { get; set; }
+	public virtual ApplicationCommandOptionTypes Type { get; set; }
 
 	/// <summary>
 	/// 1-32 character name.

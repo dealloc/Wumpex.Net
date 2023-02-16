@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Wumpex.Net.Core.Events.Gateway;
 using Wumpex.Net.Core.Events.Interactions;
+using Wumpex.Net.Core.Events.Voice;
 using Wumpex.Net.Gateway.Contracts;
 using Wumpex.Net.Gateway.Contracts.Events;
 using Wumpex.Net.Gateway.Dispatch;
@@ -10,6 +11,7 @@ using Wumpex.Net.Gateway.Handlers.Events.Core;
 using Wumpex.Net.Gateway.Hosted;
 using Wumpex.Net.Gateway.Serialization;
 using Wumpex.Net.Gateway.Serialization.Core;
+using Wumpex.Net.Gateway.Services;
 
 namespace Wumpex.Net.Gateway.Extensions;
 
@@ -45,9 +47,16 @@ public static class ServiceCollectionExtensions
 		services.AddSingleton<IEventSerializer<ReconnectEvent>, ReconnectEventSerializer>();
 		services.AddSingleton<IEventSerializer<IdentifyEvent>, IdentifyEventSerializer>();
 		services.AddSingleton<IEventSerializer<ResumeEvent>, ResumeEventSerializer>();
+		services.AddSingleton<IEventSerializer<VoiceStateUpdateEvent>, VoiceStateUpdateEventSerializer>();
 
 		// Core
 		services.AddSingleton<IEventHandler<ReadyEvent>, ReadyEventHandler>();
 		services.AddSingleton<IEventSerializer<InteractionCreateEvent>, InteractionCreateEventSerializer>();
+	}
+
+	public static void AddDeferredEventListener<TEvent>(this IServiceCollection services) where TEvent : class
+	{
+		services.AddSingleton<IEventHandler<TEvent>>(provider => provider.GetRequiredService<IDeferredEventListener<TEvent>>());
+		services.AddSingleton<IDeferredEventListener<TEvent>, DefaultDeferredEventListener<TEvent>>();
 	}
 }

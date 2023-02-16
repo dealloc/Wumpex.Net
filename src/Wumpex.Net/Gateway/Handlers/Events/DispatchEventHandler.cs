@@ -5,6 +5,7 @@ using Wumpex.Net.Core.Events.Gateway;
 using Wumpex.Net.Core.Events.Guilds;
 using Wumpex.Net.Core.Events.Interactions;
 using Wumpex.Net.Core.Events.Messages;
+using Wumpex.Net.Core.Events.Voice;
 using Wumpex.Net.Gateway.Contracts;
 using Wumpex.Net.Gateway.Contracts.Events;
 using Wumpex.Net.Gateway.Dispatch;
@@ -26,6 +27,8 @@ internal class DispatchEventHandler : IDispatchEventHandler
 	private readonly IEventSerializer<InteractionCreateEvent> _interactionCreateSerializer;
 	private readonly IEventSerializer<ChannelCreateEvent> _channelCreateSerializer;
 	private readonly IEventSerializer<ChannelDeleteEvent> _channelDeleteSerializer;
+	private readonly IEventSerializer<VoiceStateUpdateEvent> _voiceStateUpdateSerializer;
+	private readonly IEventSerializer<VoiceServerUpdateEvent> _voiceServerUpdateSerializer;
 
 	public DispatchEventHandler(ILogger<DispatchEventHandler> logger,
 		IServiceScopeFactory serviceScopeFactory,
@@ -38,7 +41,9 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		IEventSerializer<MessageUpdateEvent> messageUpdateSerializer,
 		IEventSerializer<InteractionCreateEvent> interactionCreateSerializer,
 		IEventSerializer<ChannelCreateEvent> channelCreateSerializer,
-		IEventSerializer<ChannelDeleteEvent> channelDeleteSerializer)
+		IEventSerializer<ChannelDeleteEvent> channelDeleteSerializer,
+		IEventSerializer<VoiceStateUpdateEvent> voiceStateUpdateSerializer,
+		IEventSerializer<VoiceServerUpdateEvent> voiceServerUpdateSerializer)
 	{
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
@@ -52,6 +57,8 @@ internal class DispatchEventHandler : IDispatchEventHandler
 		_interactionCreateSerializer = interactionCreateSerializer;
 		_channelCreateSerializer = channelCreateSerializer;
 		_channelDeleteSerializer = channelDeleteSerializer;
+		_voiceStateUpdateSerializer = voiceStateUpdateSerializer;
+		_voiceServerUpdateSerializer = voiceServerUpdateSerializer;
 	}
 
 	/// <inheritdoc cref="IDispatchEventHandler.HandleDispatch" />
@@ -68,6 +75,8 @@ internal class DispatchEventHandler : IDispatchEventHandler
 			"INTERACTION_CREATE" => ScopedDispatch(context, _interactionCreateSerializer.Deserialize(payload), cancellationToken),
 			"CHANNEL_CREATE" => ScopedDispatch(context, _channelCreateSerializer.Deserialize(payload), cancellationToken),
 			"CHANNEL_DELETE" => ScopedDispatch(context, _channelDeleteSerializer.Deserialize(payload), cancellationToken),
+			"VOICE_STATE_UPDATE" => ScopedDispatch(context, _voiceStateUpdateSerializer.Deserialize(payload), cancellationToken),
+			"VOICE_SERVER_UPDATE" => ScopedDispatch(context, _voiceServerUpdateSerializer.Deserialize(payload), cancellationToken),
 			_ => throw new NotSupportedException($"Unknown event '{context.EventName}' received")
 		};
 	}

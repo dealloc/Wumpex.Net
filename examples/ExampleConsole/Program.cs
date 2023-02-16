@@ -7,6 +7,7 @@ using Wumpex.Net.Gateway.Extensions;
 using ExampleConsole.Handlers.Interactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Wumpex.Net.Voice.Extensions;
 using Wumpex.Net.Core.Hosted;
 
 await Host.CreateDefaultBuilder()
@@ -15,7 +16,8 @@ await Host.CreateDefaultBuilder()
 		services.AddWumpexCore(host.Configuration.GetSection("Wumpex.Net"));
 		services.AddWumpexApi();
 		services.AddWumpexGateway();
-		services.AddDiscordIntents(GatewayIntents.Guilds, GatewayIntents.GuildMessages, GatewayIntents.DirectMessages);
+		services.AddDiscordIntents(GatewayIntents.Guilds, GatewayIntents.GuildMessages, GatewayIntents.DirectMessages, GatewayIntents.GuildVoiceStates);
+		services.AddWumpexVoice();
 		services.AddHostedService<HostedDiscordService>();
 		services.AddScoped<IEventHandler<InteractionCreateEvent>, InteractionEventHandler>();
 	})

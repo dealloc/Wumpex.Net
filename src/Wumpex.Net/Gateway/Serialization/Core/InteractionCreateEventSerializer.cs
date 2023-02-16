@@ -24,15 +24,6 @@ public class InteractionCreateEventSerializer : IEventSerializer<InteractionCrea
 	/// <inheritdoc cref="IEventSerializer{TEvent}.Deserialize" />
 	public InteractionCreateEvent Deserialize(ReadOnlySpan<byte> payload)
 	{
-		// Polymorphic serialization doesn't work if the root object is polymorphic.
-		// So, we wrap it before deserializing
-		// using var memory = new MemoryStream();
-		// memory.Write("{\"interaction\":"u8);
-		// memory.Write(payload);
-		// memory.Write("}"u8);
-		//
-		// var buffer = memory.ToArray();
-		// return JsonSerializer.Deserialize(buffer, _eventTypeInfo)!;
 		return new InteractionCreateEvent()
 		{
 			Interaction = DeserializeInteraction(ref payload)

@@ -1,12 +1,12 @@
 using Wumpex.Net.Api.Contracts;
 using Wumpex.Net.Api.Models.Interactions.InteractionResponses;
-using Wumpex.Net.Core.Constants.Interactions;
 using Wumpex.Net.Core.Events.Interactions;
 using Wumpex.Net.Core.Models.Interactions;
-using Wumpex.Net.Core.Models.Interactions.Components;
 using Wumpex.Net.Gateway.Contracts.Events;
 using Wumpex.Net.Gateway.Events.Base;
 using Microsoft.Extensions.Logging;
+using Wumpex.Net.Api.Models.Webhooks;
+using Wumpex.Net.Voice.Contracts;
 
 namespace ExampleConsole.Handlers.Interactions;
 
@@ -17,14 +17,16 @@ public class InteractionEventHandler : IEventHandler<InteractionCreateEvent>
 {
 	private readonly ILogger<InteractionEventHandler> _logger;
 	private readonly IDiscordApi _discordApi;
+	private readonly IVoiceService _voiceService;
 
 	/// <summary>
 	/// Creates a new instance of <see cref="InteractionEventHandler" />
 	/// </summary>
-	public InteractionEventHandler(ILogger<InteractionEventHandler> logger, IDiscordApi discordApi)
+	public InteractionEventHandler(ILogger<InteractionEventHandler> logger, IDiscordApi discordApi, IVoiceService voiceService)
 	{
 		_logger = logger;
 		_discordApi = discordApi;
+		_voiceService = voiceService;
 	}
 
 	/// <inheritdoc cref="IEventHandler{TEvent}.HandleEvent" />
@@ -32,50 +34,18 @@ public class InteractionEventHandler : IEventHandler<InteractionCreateEvent>
 	{
 		_logger.LogInformation("Responding to {Id} - {Token}", @event.Interaction.Id, @event.Interaction.Token);
 
-		if (@event.Interaction.Type is not InteractionTypes.ModalSubmit)
-			await RespondWithModal(@event.Interaction, cancellationToken);
-		else if (@event.Interaction is ModalSubmitInteraction submit)
+		if (@event.Interaction is ApplicationCommandInteraction interaction && string.Equals(interaction.Data?.Name, "connect"))
 		{
-			_logger.LogInformation("Responding to submit with message!");
-			await _discordApi.RespondToInteraction(@event.Interaction, new MessageInteractionResponse
+			var channel = interaction.Data?.Resolved?.Channels?.Values?.FirstOrDefault();
+			await _discordApi.RespondToInteraction(@event.Interaction, new DeferredMessageInteractionResponse(), cancellationToken);
+
+			await _voiceService.ConnectAsync(interaction.GuildId!, channel?.Id!, cancellationToken);
+
+			await _discordApi.FollowUpInteraction(@event.Interaction, new ExecuteWebhookRequest
 			{
-				Data = new()
-				{
-					Content = $"We received {submit.Data?.Components?.FirstOrDefault()?.Components?.FirstOrDefault()?.Value}"
-				}
+				Wait = true,
+				Content = "Connected to voice!"
 			}, cancellationToken);
 		}
-	}
-
-	private Task RespondWithModal(Interaction interaction, CancellationToken cancellationToken)
-	{
-		_logger.LogInformation("Responding with modal");
-
-		return _discordApi.RespondToInteraction(interaction, new ModalInteractionResponse
-		{
-			Data = new InteractionCallbackModal
-			{
-				CustomId = "modal_id",
-				Title = "This is a modal",
-				Components = new()
-				{
-					new ActionRowComponent()
-					{
-						Components = new()
-						{
-							new TextInputComponent
-							{
-								CustomId = "name",
-								Label = "Name",
-								Style = TextInputStyles.Short,
-								MinLength = 1,
-								MaxLength = 4000,
-								Required = true
-							}
-						}
-					}
-				}
-			}
-		}, cancellationToken);
 	}
 }

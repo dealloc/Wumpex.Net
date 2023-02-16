@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Wumpex.Net.Core.Constants.Channels;
+using Wumpex.Net.Core.Constants.Interactions;
 
 namespace Wumpex.Net.Core.Models.Interactions.ApplicationCommands.ApplicationCommandOptions;
 
@@ -8,6 +9,9 @@ namespace Wumpex.Net.Core.Models.Interactions.ApplicationCommands.ApplicationCom
 /// </summary>
 public sealed class ApplicationCommandOptionWithChannelTypes : ApplicationCommandOption
 {
+	/// <inheritdoc cref="ApplicationCommandOption.Type" />
+	public override ApplicationCommandOptionTypes Type { get; set; } = ApplicationCommandOptionTypes.Channel;
+
 	/// <summary>
 	/// If the option is a channel type, the channels shown will be restricted to these types.
 	/// </summary>

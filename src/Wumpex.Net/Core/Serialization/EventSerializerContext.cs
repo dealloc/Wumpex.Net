@@ -5,6 +5,7 @@ using Wumpex.Net.Core.Events.Gateway;
 using Wumpex.Net.Core.Events.Guilds;
 using Wumpex.Net.Core.Events.Interactions;
 using Wumpex.Net.Core.Events.Messages;
+using Wumpex.Net.Core.Events.Voice;
 
 namespace Wumpex.Net.Core.Serialization;
 
@@ -21,6 +22,8 @@ namespace Wumpex.Net.Core.Serialization;
 [JsonSerializable(typeof(InteractionCreateEvent))]
 [JsonSerializable(typeof(ChannelCreateEvent))]
 [JsonSerializable(typeof(ChannelDeleteEvent))]
+[JsonSerializable(typeof(VoiceStateUpdateEvent))]
+[JsonSerializable(typeof(VoiceServerUpdateEvent))]
 public partial class EventSerializerContext : JsonSerializerContext
 {
 }
